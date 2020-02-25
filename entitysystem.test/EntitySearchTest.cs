@@ -5,6 +5,16 @@ using Xunit;
 
 namespace entitysystem.test
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// This system is set up with a broad scope in mind. There are many generic bits that attempt to simplify
+    /// running standard tests on every type of entity object. Although the entity system is a VAST simplification
+    /// over most normal systems, there are still duplication issues across the three entity types. This is to 
+    /// keep the database from becoming TOO generic and simplify use; with builtin types, names, content etc, the
+    /// system may very well have what you need out of the box.
+    /// </remarks>
     public class EntitySearchTest : UnitTestBase
     {
         protected EntitySearcher searcher;
