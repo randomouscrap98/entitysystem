@@ -7,7 +7,7 @@ namespace entitysystem.test
 {
     public class EntitySearchTest : UnitTestBase
     {
-        public IEntitySearcher CreateSearcher()
+        public EntitySearcher CreateSearcher()
         {
             return CreateService<EntitySearcher>();
         }
@@ -35,7 +35,17 @@ namespace entitysystem.test
             var searcher = CreateSearcher();
 
             //An empty search should return all entities
-            Assert.Equal(searcher.ApplyEntitySearch(entities.AsQueryable(), new EntitySearch()).Count(), entities.Count);
+            Assert.Equal(searcher.ApplyGeneric<Entity>(entities.AsQueryable(), new EntitySearch()).Count(), entities.Count);
+        }
+
+        [Fact]
+        public void TestSearchIds()
+        {
+            var entities = BasicEntityList();
+            var searcher = CreateSearcher();
+
+            //Try searching for 1 or more ids
+            Assert.Equal(searcher.ApplyGeneric<Entity>(entities.AsQueryable(), new EntitySearch()).Count(), entities.Count);
         }
     }
 }
