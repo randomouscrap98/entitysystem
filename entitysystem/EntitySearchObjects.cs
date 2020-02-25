@@ -25,9 +25,15 @@ namespace entitysystem
     /// <summary>
     /// Search parameters for entity values
     /// </summary>
+    /// <remarks>
+    /// Each search applies to JUST the table it applies to. So, even though there may be many keys and values per 
+    /// content, you should only be searching for ONE of each per search. You can merge them later; don't overcomplicate
+    /// the system.
+    /// </remarks>
     public class EntityValueSearch : EntitySearchBase
     {
-        public Dictionary<string, string> ValueRegex = new Dictionary<string, string>(); //string, List<string>> Values = new Dictionary<string, List<string>>();
+        public string KeyRegex = "";
+        public string ValueRegex = "";
         public List<long> EntityIds = new List<long>();
     }
 

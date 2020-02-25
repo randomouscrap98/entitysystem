@@ -4,7 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace entitysystem
 {
-    //TODO: DON'T NAME IT THIS
+    /// <summary>
+    /// A simple queryable reducer for various entity searches. Narrows a query
+    /// based on the given search object
+    /// </summary>
     public class EntitySearcher : IEntitySearcher
     {
         public ILogger logger;
@@ -14,6 +17,16 @@ namespace entitysystem
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Apply generic base search parameters such as ids and create date constraints. 
+        /// </summary>
+        /// <remarks>
+        /// All interface search functions should call this
+        /// </remarks>
+        /// <param name="query"></param>
+        /// <param name="search"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public IQueryable<T> ApplyGeneric<T>(IQueryable<T> query, EntitySearchBase search) where T : EntityBase
         {
             if(search.Ids.Count > 0)
@@ -36,13 +49,13 @@ namespace entitysystem
             if(!string.IsNullOrEmpty(search.NameRegex))
             {
                 var regex = new Regex(search.NameRegex);
-                query = query.Where(x => regex.IsMatch(x.name));
+                query = query.Where(x => x.name != null && regex.IsMatch(x.name)); //the stupid... ugh ORM makes me have to repeat this code. I think...
             }
 
             if(!string.IsNullOrEmpty(search.TypeRegex))
             {
                 var regex = new Regex(search.TypeRegex);
-                query = query.Where(x => regex.IsMatch(x.type));
+                query = query.Where(x => x.type != null && regex.IsMatch(x.type));
             }
 
             return query;
@@ -50,12 +63,43 @@ namespace entitysystem
 
         public IQueryable<EntityValue> ApplyEntityValueSearch(IQueryable<EntityValue> query, EntityValueSearch search)
         {
-            throw new System.NotImplementedException();
+            query = ApplyGeneric<EntityValue>(query, search);
+
+            if(!string.IsNullOrEmpty(search.KeyRegex))
+            {
+                var regex = new Regex(search.KeyRegex);
+                query = query.Where(x => x.key != null && regex.IsMatch(x.key));
+            }
+
+            if(!string.IsNullOrEmpty(search.ValueRegex))
+            {
+                var regex = new Regex(search.ValueRegex);
+                query = query.Where(x => x.key != null && regex.IsMatch(x.key));
+            }
+
+            if(search.EntityIds.Count > 0)
+                query = query.Where(x => search.EntityIds.Contains(x.entityId));
+
+            return query;
         }
 
         public IQueryable<EntityRelation> ApplyEntityRelationSearch(IQueryable<EntityRelation> query, EntityRelationSearch search)
         {
-            throw new System.NotImplementedException();
+            query = ApplyGeneric<EntityRelation>(query, search);
+
+            if(!string.IsNullOrEmpty(search.TypeRegex))
+            {
+                var regex = new Regex(search.TypeRegex);
+                query = query.Where(x => x.type != null && regex.IsMatch(x.type));
+            }
+
+            if(search.EntityIds1.Count > 0)
+                query = query.Where(x => search.EntityIds1.Contains(x.entityId1));
+
+            if(search.EntityIds2.Count > 0)
+                query = query.Where(x => search.EntityIds1.Contains(x.entityId2));
+
+            return query;
         }
     }
 }

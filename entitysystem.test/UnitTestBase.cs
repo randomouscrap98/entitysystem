@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -29,6 +31,12 @@ namespace entitysystem.test
         {
             var provider = CreateService<EntityProviderMemory>();
             Assert.NotNull(provider);
+        }
+
+        protected void AssertResultsEqual<T>(IEnumerable<T> expected, IEnumerable<T> result)
+        {
+            Assert.Equal(expected.Count(), result.Count());
+            Assert.Equal(expected.ToHashSet(), result.ToHashSet());
         }
     }
 }
