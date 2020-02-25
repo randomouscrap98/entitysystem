@@ -41,11 +41,22 @@ namespace entitysystem.test
         [Fact]
         public void TestSearchIds()
         {
-            var entities = BasicEntityList();
+            var entities = BasicEntityList(50);
             var searcher = CreateSearcher();
+            var search = new EntitySearch();
+
+            Assert.True(entities.Count == 50);
 
             //Try searching for 1 or more ids
-            Assert.Equal(searcher.ApplyGeneric<Entity>(entities.AsQueryable(), new EntitySearch()).Count(), entities.Count);
+            search.Ids.Add(1);
+            var result = searcher.ApplyGeneric<Entity>(entities.AsQueryable(), search).ToList();
+            Assert.Single(result);
+            Assert.Equal(result, entities.Where(x => x.id == 1).ToList());
+
+            search.Ids.Add(20);
+            result = searcher.ApplyGeneric<Entity>(entities.AsQueryable(), search).ToList();
+            Assert.Equal(2, result.Count);
+            Assert.Equal(result, entities.Where(x => x.id == 1 || x.id == 20).ToList());
         }
     }
 }
