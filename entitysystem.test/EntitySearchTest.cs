@@ -30,53 +30,84 @@ namespace entitysystem.test
             return entities.AsQueryable();
         }
 
-        [Fact]
-        public void TestEmptySearch()
+        protected void SimpleEmptyTest<E,S>(Func<S, IQueryable<E>, IQueryable<E>> applySearch) where E : EntityBase, new() where S : EntitySearchBase, new()
         {
-            var entities = BasicDataset<EntityBase>();
-
-            //An empty search should return all entities
-            var result = searcher.ApplyGeneric<EntityBase>(entities, new EntitySearch());
-            AssertResultsEqual(result, entities);
+            var entities = BasicDataset<E>();
+            var result = applySearch(new S(), entities);
+            AssertResultsEqual(entities, result);
         }
 
         [Fact]
-        public void TestSearchIds()
+        public void SearchBaseEmpty() { SimpleEmptyTest<EntityBase, EntitySearchBase>((s, e) => searcher.ApplyGeneric<EntityBase>(e, s)); }
+
+        [Fact]
+        public void SearchEntityEmpty() { SimpleEmptyTest<Entity, EntitySearch>((s, e) => searcher.ApplyEntitySearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityValueEmpty() { SimpleEmptyTest<EntityValue, EntityValueSearch>((s, e) => searcher.ApplyEntityValueSearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityRelationEmpty() { SimpleEmptyTest<EntityRelation, EntityRelationSearch>((s, e) => searcher.ApplyEntityRelationSearch(e, s)); }
+
+        protected void SimpleIdsTest<E,S>(Func<S, IQueryable<E>, IQueryable<E>> applySearch) where E : EntityBase, new() where S : EntitySearchBase, new()
         {
-            var entities = BasicDataset<EntityBase>();
-            var search = new EntitySearch();
+            var entities = BasicDataset<E>();
+            var search = new S();
 
             //Try searching for 1 or more ids
             search.Ids.Add(1);
-            var result = searcher.ApplyGeneric<EntityBase>(entities, search);
+            var result = applySearch(search, entities);
             AssertResultsEqual(entities.Where(x => x.id == 1), result);
 
             search.Ids.Add(20);
-            result = searcher.ApplyGeneric<EntityBase>(entities, search);
+            result = applySearch(search, entities);
             AssertResultsEqual(entities.Where(x => x.id == 1 || x.id == 20), result);
 
             search.Ids.Add(1); //It SHOULD BE acceptable to have duplicates
-            result = searcher.ApplyGeneric<EntityBase>(entities, search);
+            result = applySearch(search, entities);
             AssertResultsEqual(entities.Where(x => x.id == 1 || x.id == 20), result);
             Assert.Equal(2, result.Count());
         }
 
         [Fact]
-        public void TestSearchDates()
+        public void SearchBaseIds() { SimpleIdsTest<EntityBase, EntitySearchBase>((s, e) => searcher.ApplyGeneric<EntityBase>(e, s)); }
+
+        [Fact]
+        public void SearchEntityIds() { SimpleIdsTest<Entity, EntitySearch>((s, e) => searcher.ApplyEntitySearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityValueIds() { SimpleIdsTest<EntityValue, EntityValueSearch>((s, e) => searcher.ApplyEntityValueSearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityRelationIds() { SimpleIdsTest<EntityRelation, EntityRelationSearch>((s, e) => searcher.ApplyEntityRelationSearch(e, s)); }
+
+        protected void SimpleDatesTest<E,S>(Func<S, IQueryable<E>, IQueryable<E>> applySearch) where E : EntityBase, new() where S : EntitySearchBase, new()
         {
-            var entities = BasicDataset<EntityBase>();
-            var search = new EntitySearch();
+            var entities = BasicDataset<E>();
+            var search = new S();
 
             search.CreateStart = DateTime.Now.AddDays(-10);
-            var result = searcher.ApplyGeneric<EntityBase>(entities, search);
+            var result = applySearch(search, entities);
             Assert.True(result.Count() >= 9 && result.Count() <= 11);
             AssertResultsEqual(entities.Where(x => x.createDate >= search.CreateStart), result);
 
             search.CreateEnd = DateTime.Now.AddDays(-5);
-            result = searcher.ApplyGeneric<EntityBase>(entities, search);
+            result = applySearch(search, entities);
             Assert.True(result.Count() >= 4 && result.Count() <= 6);
             AssertResultsEqual(entities.Where(x => x.createDate >= search.CreateStart && x.createDate <= search.CreateEnd), result);
         }
+
+        [Fact]
+        public void SearchBaseDates() { SimpleDatesTest<EntityBase, EntitySearchBase>((s, e) => searcher.ApplyGeneric<EntityBase>(e, s)); }
+
+        [Fact]
+        public void SearchEntityDates() { SimpleDatesTest<Entity, EntitySearch>((s, e) => searcher.ApplyEntitySearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityValueDates() { SimpleDatesTest<EntityValue, EntityValueSearch>((s, e) => searcher.ApplyEntityValueSearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityRelationDates() { SimpleDatesTest<EntityRelation, EntityRelationSearch>((s, e) => searcher.ApplyEntityRelationSearch(e, s)); }
 
         protected Tuple<string, IQueryable<E>> SetupRegexTest<E>(Action<E, string> setField, IQueryable<E> entities) where E : EntityBase
         {
@@ -104,20 +135,42 @@ namespace entitysystem.test
         }
 
         [Fact]
-        public void TestSearchEntityType()
+        public void SearchEntityType()
         {
-            SimpleRegexTest<Entity>((e, s) => e.type = s, (s, e) =>
-            {
+            SimpleRegexTest<Entity>((e, s) => e.type = s, (s, e) => {
                 return searcher.ApplyEntitySearch(e, new EntitySearch() {TypeRegex = s});
             });
         }
 
         [Fact]
-        public void TestSearchEntityName()
+        public void SearchEntityName()
         {
-            SimpleRegexTest<Entity>((e, s) => e.name = s, (s, e) =>
-            {
+            SimpleRegexTest<Entity>((e, s) => e.name = s, (s, e) => {
                 return searcher.ApplyEntitySearch(e, new EntitySearch() {NameRegex= s});
+            });
+        }
+
+        [Fact]
+        public void SearchRelationType()
+        {
+            SimpleRegexTest<EntityRelation>((e, s) => e.type = s, (s, e) => {
+                return searcher.ApplyEntityRelationSearch(e, new EntityRelationSearch() {TypeRegex = s});
+            });
+        }
+
+        [Fact]
+        public void SearchValueKey()
+        {
+            SimpleRegexTest<EntityValue>((e, s) => e.key = s, (s, e) => {
+                return searcher.ApplyEntityValueSearch(e, new EntityValueSearch() {KeyRegex = s});
+            });
+        }
+
+        [Fact]
+        public void SearchValueValue()
+        {
+            SimpleRegexTest<EntityValue>((e, s) => e.value = s, (s, e) => {
+                return searcher.ApplyEntityValueSearch(e, new EntityValueSearch() {ValueRegex= s});
             });
         }
     }

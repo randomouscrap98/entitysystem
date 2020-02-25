@@ -74,7 +74,7 @@ namespace entitysystem
             if(!string.IsNullOrEmpty(search.ValueRegex))
             {
                 var regex = new Regex(search.ValueRegex);
-                query = query.Where(x => x.key != null && regex.IsMatch(x.key));
+                query = query.Where(x => x.value != null && regex.IsMatch(x.value));
             }
 
             if(search.EntityIds.Count > 0)
