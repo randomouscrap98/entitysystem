@@ -1,12 +1,20 @@
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace entitysystem
 {
     //TODO: DON'T NAME IT THIS
-    public class EntitySearchHelper
+    public class EntitySearcher : IEntitySearcher
     {
-        IQueryable<T> ApplyGeneric<T>(IQueryable<T> query, EntitySearchBase search) where T : EntityBase
+        public ILogger logger;
+
+        public EntitySearcher(ILogger<EntitySearch> logger)
+        {
+            this.logger = logger;
+        }
+
+        public IQueryable<T> ApplyGeneric<T>(IQueryable<T> query, EntitySearchBase search) where T : EntityBase
         {
             if(search.Ids.Count > 0)
                 query = query.Where(x => search.Ids.Contains(x.id));
@@ -19,7 +27,7 @@ namespace entitysystem
             return query;
         }
 
-        IQueryable<Entity> ApplyEntitySearch(IQueryable<Entity> query, EntitySearch search)
+        public IQueryable<Entity> ApplyEntitySearch(IQueryable<Entity> query, EntitySearch search)
         {
             query = ApplyGeneric<Entity>(query, search);
             
@@ -38,6 +46,16 @@ namespace entitysystem
             }
 
             return query;
+        }
+
+        public IQueryable<EntityValue> ApplyEntityValueSearch(IQueryable<EntityValue> query, EntityValueSearch search)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IQueryable<EntityRelation> ApplyEntityRelationSearch(IQueryable<EntityRelation> query, EntityRelationSearch search)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

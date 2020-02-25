@@ -1,5 +1,7 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using Xunit;
 
 namespace entitysystem.test
@@ -9,28 +11,23 @@ namespace entitysystem.test
         public IServiceCollection CreateServices()
         {
             var services = new ServiceCollection();
-            services.AddLogging();
-            services.AddSingleton(new EntitySearchHelper());
+            services.AddLogging(configure => configure.AddConsole().AddSerilog(new LoggerConfiguration().WriteTo.File($"{GetType()}.txt").CreateLogger()));
+            services.AddTransient<IEntitySearcher, EntitySearcher>();
             services.AddTransient<IEntityProvider, EntityProviderMemory>();
             return services;
-        }
-
-        public IEntityProvider GetProvider()
-        {
-            return CreateService<IEntityProvider>();
         }
 
         public T CreateService<T>()
         {
             var services = CreateServices();
             var provider = services.BuildServiceProvider();
-            return provider.GetService<T>();
+            return (T)ActivatorUtilities.CreateInstance(provider, typeof(T));
         }
 
         [Fact]
         public void TestCreateService()
         {
-            var provider = GetProvider();
+            var provider = CreateService<EntityProviderMemory>();
             Assert.NotNull(provider);
         }
     }
