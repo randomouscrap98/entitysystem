@@ -97,7 +97,7 @@ namespace entitysystem
                 query = query.Where(x => search.EntityIds1.Contains(x.entityId1));
 
             if(search.EntityIds2.Count > 0)
-                query = query.Where(x => search.EntityIds1.Contains(x.entityId2));
+                query = query.Where(x => search.EntityIds2.Contains(x.entityId2));
 
             return query;
         }
