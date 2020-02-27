@@ -31,17 +31,11 @@ namespace entitysystem.test
             connections.Append(connection);
 
             var services = new ServiceCollection();
-            services.AddLogging(configure => configure.AddConsole().AddSerilog(new LoggerConfiguration().WriteTo.File($"{GetType()}.txt").CreateLogger()));
+            services.AddLogging(configure => configure.AddSerilog(new LoggerConfiguration().WriteTo.File($"{GetType()}.txt").CreateLogger()));
             services.AddTransient<IEntitySearcher, EntitySearcher>();
             services.AddTransient<IEntityProvider, EntityProviderEfCore>();
-            services.AddDbContext<BaseEntityContext>(options => options.UseSqlite(connection).EnableSensitiveDataLogging(false));
+            services.AddDbContext<BaseEntityContext>(options => options.UseSqlite(connection).EnableSensitiveDataLogging(true));
             services.AddScoped<DbContext, BaseEntityContext>();
-            /*services.AddSingleton<DbContext, BaseEntityContext>(pr => 
-            {
-                var ctx = pr.GetService<BaseEntityContext>();
-                ctx.Database.EnsureCreated();
-                return ctx;
-            });*/
             return services;
         }
 
