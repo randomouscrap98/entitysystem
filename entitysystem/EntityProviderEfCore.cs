@@ -94,7 +94,7 @@ namespace entitysystem
         //    return newEntities;
         //}
 
-        public async Task WriteEntities(IEnumerable<Entity> entities)
+        public async Task WriteEntitiesAsync(IEnumerable<Entity> entities)
         {
             //Yes, we let efcore do all the work. if something weird happens... oh well. this class
             //isn't meant for safety... I think?
@@ -102,13 +102,13 @@ namespace entitysystem
             await context.SaveChangesAsync();
         }
 
-        public async Task WriteEntityRelations(IEnumerable<EntityRelation> relations)
+        public async Task WriteEntityRelationsAsync(IEnumerable<EntityRelation> relations)
         {
             context.UpdateRange(relations);
             await context.SaveChangesAsync();
         }
 
-        public async Task WriteEntityValues(IEnumerable<EntityValue> values)
+        public async Task WriteEntityValuesAsync(IEnumerable<EntityValue> values)
         {
             context.UpdateRange(values);
             await context.SaveChangesAsync();

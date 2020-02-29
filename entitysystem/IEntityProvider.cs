@@ -9,8 +9,8 @@ namespace entitysystem
         Task<List<EntityValue>> GetEntityValuesAsync(EntityValueSearch search);
         Task<List<EntityRelation>> GetEntityRelationsAsync(EntityRelationSearch search);
 
-        Task WriteEntities(IEnumerable<Entity> entities);
-        Task WriteEntityValues(IEnumerable<EntityValue> values);
-        Task WriteEntityRelations(IEnumerable<EntityRelation> relations);
+        Task WriteEntitiesAsync(IEnumerable<Entity> entities);
+        Task WriteEntityValuesAsync(IEnumerable<EntityValue> values);
+        Task WriteEntityRelationsAsync(IEnumerable<EntityRelation> relations);
     }
 }
