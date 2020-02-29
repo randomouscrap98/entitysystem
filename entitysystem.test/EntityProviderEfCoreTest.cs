@@ -37,7 +37,7 @@ namespace entitysystem.test
         public void SimpleProviderWriteTest()
         {
             //Can we insert objects and get them out?
-            provider.WriteEntitiesAsync(new[] {NewSingleEntity()}).Wait();
+            provider.WriteAsync<Entity>(new[] {NewSingleEntity()}).Wait();
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace entitysystem.test
         {
             //Can we insert objects and get them out?
             var entity = NewSingleEntity();
-            provider.WriteEntitiesAsync(new[] {entity}).Wait();
+            provider.WriteAsync<Entity>(new[] {entity}).Wait();
             var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Equal(entity, entities.First());
             //NOTE: this also assumes entity id is written!
@@ -55,9 +55,9 @@ namespace entitysystem.test
         public void SimpleProviderUpdateTest()
         {
             var entity = NewSingleEntity();
-            provider.WriteEntitiesAsync(new[] {entity}).Wait();
+            provider.WriteAsync<Entity>(new[] {entity}).Wait();
             entity.type = "NONEOFYOURBUSINESS";
-            provider.WriteEntitiesAsync(new[] {entity}).Wait(); //This SHOULD be just an update
+            provider.WriteAsync<Entity>(new[] {entity}).Wait(); //This SHOULD be just an update
             var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Single(entities);
             Assert.Equal(entity, entities.First()); //assume this works correctly (is it safe to assume?)
@@ -68,7 +68,7 @@ namespace entitysystem.test
         {
             //Can we insert objects and get them out?
             for(var i = 0; i < 10; i++)
-                provider.WriteEntitiesAsync(new[] {NewSingleEntity()}).Wait();
+                provider.WriteAsync<Entity>(new[] {NewSingleEntity()}).Wait();
 
             var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Equal(10, entities.Count);
@@ -79,7 +79,7 @@ namespace entitysystem.test
             for(var i = 0; i < 10; i++)
                 writeEntries.Add(NewSingleEntity());
 
-            provider.WriteEntitiesAsync(writeEntries).Wait();
+            provider.WriteAsync<Entity>(writeEntries).Wait();
             entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Equal(20, entities.Count);
         }
