@@ -24,9 +24,9 @@ namespace entitysystem.test
             //The signal items should not throw an exception.
         }
 
-        protected Task<List<int>> CreateSingleListen(int look)
+        protected Task<List<int>> CreateSingleListen(int look, TimeSpan? listenTime = null)
         {
-            var task = signaler.ListenAsync((x) => x == look, TimeSpan.FromMinutes(1));
+            var task = signaler.ListenAsync((x) => x == look, listenTime ?? TimeSpan.FromMinutes(1));
             Assert.False(task.IsCompleted); //There should be no signals yet
             return task;
         }
@@ -72,6 +72,27 @@ namespace entitysystem.test
             Assert.True(result.ContainsKey(7));
             Assert.Equal(1, result[7]);  //A single listener (us)
             AssertListen(task, new List<int>() {9,7});
+        }
+
+        [Fact]
+        public async Task Nonsignaled()
+        {
+            var task9 = CreateSingleListen(9); 
+            var task7 = CreateSingleListen(7, TimeSpan.FromMilliseconds(100));
+            var result = signaler.SignalItems(new[] {9});
+            Assert.True(result.ContainsKey(9));
+            Assert.Equal(1, result[9]);  //A single listener (us)
+            Assert.False(result.ContainsKey(7)); //No signalled entities
+            AssertListen(task9, new List<int>() {9});
+            try
+            {
+                var fakeResult = task7.Result;
+                throw new InvalidOperationException("This should've thrown an exception!");
+            }
+            catch(Exception ex)
+            {
+                Assert.IsType<TimeoutException>(ex.InnerException);
+            }
         }
     }
 }
