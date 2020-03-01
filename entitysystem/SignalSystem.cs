@@ -52,7 +52,7 @@ namespace entitysystem
                         var signalItems = items.Where(x => listener.Filter(x)).ToList();
 
                         //Signal this listener if any did. Increase signal count for each item 
-                        if(listener.Signalers.Count > 0)
+                        if(signalItems.Count > 0)
                         {
                             listener.Signalers = signalItems;
                             listener.Signal.Set();
