@@ -37,6 +37,7 @@ namespace entitysystem.test
             services.AddDbContext<BaseEntityContext>(options => options.UseSqlite(connection).EnableSensitiveDataLogging(true));
             services.AddScoped<DbContext, BaseEntityContext>();
             services.AddSingleton(new EntityProviderEfCoreConfig());
+            services.AddTransient<ISignaler<EntityBase>, SignalSystem<EntityBase>>();
             return services;
         }
 

@@ -13,36 +13,23 @@ namespace entitysystem
         public int MaxRetrieve {get;set;} = 10000;
     }
 
-    public class EntityListener : IDisposable // <E> where E : EntityBase
-    {
-        public EntityBase SignaledEntity = null;
-        public Func<EntityBase, bool> Filter;
-        public AutoResetEvent Signal = new AutoResetEvent(false);
-
-        //I don't CARE if this is "not the right way to do dispose", the right way is GARBAGE and I am
-        //the only one calling dispose so... I think I'll be fine.
-        public void Dispose()
-        {
-            Signal.Dispose();
-        }
-    }
-
     public class EntityProviderEfCore : IEntityProvider
     {
         protected ILogger logger;
         protected IEntitySearcher searcher;
+        protected ISignaler<EntityBase> signaler;
+
         public DbContext context;
         public EntityProviderEfCoreConfig config;
 
-        private List<EntityListener> listeners = new List<EntityListener>();
-        private readonly object listenLock = new object();
-
-        public EntityProviderEfCore(ILogger<EntityProviderEfCore> logger, IEntitySearcher searcher, DbContext context, EntityProviderEfCoreConfig config)
+        public EntityProviderEfCore(ILogger<EntityProviderEfCore> logger, IEntitySearcher searcher, 
+            DbContext context, ISignaler<EntityBase> signaler, EntityProviderEfCoreConfig config)
         {
             this.searcher = searcher;
             this.logger = logger;
             this.context = context;
             this.config = config;
+            this.signaler = signaler;
         }
 
         public async Task<List<Entity>> GetEntitiesAsync(EntitySearch search)
@@ -70,32 +57,7 @@ namespace entitysystem
             logger.LogTrace($"WriteAsync called for {items.Count()} {typeof(E).Name} items");
             context.UpdateRange(items);
             await context.SaveChangesAsync();
-
-            //Assuming saving actually works, let's go alert everyone
-            lock(listenLock)
-            {
-                foreach(var item in items)
-                {
-                    try
-                    {
-                        var signalers = listeners.Where(x => x.Filter(item));
-
-                        foreach (var signal in signalers)
-                            signal.Signal.Set();
-                    }
-                    catch(Exception ex)
-                    {
-                        logger.LogError($"Error while signalling for item {item.id}: {ex}");
-                    }
-                }
-            }
-        }
-
-        public async Task<bool> ListenAsync(EntityListener listener, TimeSpan maxWait)
-        {
-            bool signaled = false;
-            await Task.Run(() => signaled = listener.Signal.WaitOne(maxWait));
-            return signaled;
+            signaler.SignalItems(items);
         }
 
         public async Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<E, bool> filter = null) where E : EntityBase
@@ -108,29 +70,8 @@ namespace entitysystem
 
             if(results.Count > 0)
                 return results;
-
-            using(var listener = new EntityListener())
-            {
-                listener.Filter = (e) => e is E && e.id > lastId && filter((E)e);
-
-                lock(listenLock)
-                    listeners.Add(listener);
-
-                try
-                {
-                    if (await ListenAsync(listener, maxWait))
-                        return new List<E>() { (E)listener.SignaledEntity };
-                }
-                finally
-                {
-                    //WE have to remove it because we added it
-                    lock(listenLock)
-                        listeners.Remove(listener);
-                }
-            }
-
-            //Oh there were none ready... go ahead and listen for changes.
-            return null;
+            else
+                return (await signaler.ListenAsync((e) => e is E && e.id > lastId && filter((E)e), maxWait)).Cast<E>().ToList();
         }
     }
 }
