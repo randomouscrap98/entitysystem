@@ -75,7 +75,7 @@ namespace entitysystem.test
         }
 
         [Fact]
-        public async Task Nonsignaled()
+        public void Nonsignaled()
         {
             var task9 = CreateSingleListen(9); 
             var task7 = CreateSingleListen(7, TimeSpan.FromMilliseconds(100));
