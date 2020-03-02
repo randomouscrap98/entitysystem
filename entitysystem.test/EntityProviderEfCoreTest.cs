@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -82,6 +83,23 @@ namespace entitysystem.test
             provider.WriteAsync<Entity>(writeEntries).Wait();
             entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Equal(20, entities.Count);
+        }
+
+        [Fact]
+        public void ListenTest()
+        {
+            //We're listening on empty
+            var task = provider.ListenNewAsync<Entity>(0, TimeSpan.FromMinutes(1));
+            Assert.False(task.IsCompleted);
+
+            //Add a new entity. This should complete the above task.
+            var entity = NewSingleEntity();
+            provider.WriteAsync<Entity>(new[] {entity}).Wait();
+            Assert.True(task.Wait(200));
+
+            var result = task.Result;
+            Assert.Single(result);
+            Assert.Equal(entity, result.First());
         }
     }
 }

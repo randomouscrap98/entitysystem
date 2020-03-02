@@ -33,8 +33,8 @@ namespace entitysystem.test
 
         protected void AssertListen(Task<List<int>> task, List<int> expected)
         {
-            Assert.True(task.Wait(1));   //We should've gotten signaled
-            var retrieved = task.Result; //This won't wait at all if the previous came through
+            Assert.True(task.Wait(200));    //We should've gotten signaled. Give the test plenty of time to get the memo
+            var retrieved = task.Result;    //This won't wait at all if the previous came through
             Assert.True(expected.OrderBy(x => x).SequenceEqual(retrieved.OrderBy(x => x)));
         }
 
