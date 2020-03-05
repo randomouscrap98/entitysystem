@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace entitysystem
+namespace Randomous.EntitySystem
 {
     /// <summary>
     /// Tools for modifying queryable sets with entity searches (could be any kind of query)

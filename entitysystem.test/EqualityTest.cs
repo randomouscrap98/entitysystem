@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace entitysystem.test
+namespace Randomous.EntitySystem.test
 {
     public class EqualityTest : UnitTestBase
     {

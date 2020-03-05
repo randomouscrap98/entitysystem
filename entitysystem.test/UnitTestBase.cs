@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Xunit;
 
-namespace entitysystem.test
+namespace Randomous.EntitySystem.test
 {
     public class UnitTestBase : IDisposable
     {

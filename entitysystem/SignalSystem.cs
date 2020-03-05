@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace entitysystem
+namespace Randomous.EntitySystem
 {
     public class Listener<T> : IDisposable
     {

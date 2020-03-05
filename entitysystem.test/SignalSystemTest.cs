@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace entitysystem.test
+namespace Randomous.EntitySystem.test
 {
     public class SignalSystemTest : UnitTestBase
     {

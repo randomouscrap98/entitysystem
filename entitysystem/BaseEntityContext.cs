@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace entitysystem
+namespace Randomous.EntitySystem
 {
     /// <summary>
     /// A basic context that describes the defaults for tables and relationships in the entity system.

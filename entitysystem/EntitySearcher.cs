@@ -2,7 +2,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 
-namespace entitysystem
+namespace Randomous.EntitySystem
 {
     /// <summary>
     /// A simple queryable reducer for various entity searches. Narrows a query

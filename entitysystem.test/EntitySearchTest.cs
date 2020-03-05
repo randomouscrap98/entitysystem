@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace entitysystem.test
+namespace Randomous.EntitySystem.test
 {
     /// <summary>
     /// 

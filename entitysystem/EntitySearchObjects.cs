@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 // Why have separate entity search objects instead of querying directly? The data might not be stored the way you think!
 // What if one day, IQueryable isn't valid anymore? Objects will always be valid, and lists probably too
-namespace entitysystem
+namespace Randomous.EntitySystem
 {
     /// <summary>
     /// Base search for ALL kinds of entity search

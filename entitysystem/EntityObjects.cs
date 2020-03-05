@@ -1,6 +1,6 @@
 using System;
 
-namespace entitysystem
+namespace Randomous.EntitySystem
 {
     /// <summary>
     /// All items in this system have these fields
