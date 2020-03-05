@@ -101,5 +101,27 @@ namespace entitysystem.test
             Assert.Single(result);
             Assert.Equal(entity, result.First());
         }
+
+        [Fact]
+        public void ListenLaterTest()
+        {
+            var task = provider.ListenNewAsync<Entity>(5, TimeSpan.FromMinutes(1));
+            Assert.False(task.IsCompleted);
+
+            for(var i = 0; i < 5; i++)
+            {
+                provider.WriteAsync<Entity>(new[] {NewSingleEntity()}).Wait();
+                Assert.False(task.Wait(10));
+                Assert.False(task.IsCompleted);
+            }
+
+            var entity = NewSingleEntity();
+            provider.WriteAsync<Entity>(new[] {entity}).Wait();
+            Assert.True(task.Wait(200));
+
+            var result = task.Result;
+            Assert.Single(result);
+            Assert.Equal(entity, result.First());
+        }
     }
 }
