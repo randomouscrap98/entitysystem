@@ -13,6 +13,7 @@ namespace Randomous.EntitySystem.test
     public class UnitTestBase : IDisposable
     {
         public List<SqliteConnection> connections = new List<SqliteConnection>();
+        public string SqliteConnectionString = "Data Source=:memory:;";
 
         public void Dispose()
         {
@@ -26,7 +27,7 @@ namespace Randomous.EntitySystem.test
         public IServiceCollection CreateServices()
         {
             //Whhyyyy am I doing it like this.
-            var connection = new SqliteConnection("Data Source=:memory:;");
+            var connection = new SqliteConnection(SqliteConnectionString);
             connection.Open();
             connections.Append(connection);
 
