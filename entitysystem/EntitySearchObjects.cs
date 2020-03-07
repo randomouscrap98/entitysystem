@@ -45,7 +45,6 @@ namespace Randomous.EntitySystem
     public class EntityRelationSearch : EntitySearchBase
     {
         public string TypeLike;
-        //public List<string> Types = new List<string>();
         public List<long> EntityIds1 = new List<long>();
         public List<long> EntityIds2 = new List<long>();
     }

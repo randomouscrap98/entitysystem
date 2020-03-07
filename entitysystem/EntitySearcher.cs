@@ -45,10 +45,8 @@ namespace Randomous.EntitySystem
         {
             query = ApplyGeneric<Entity>(query, search);
             
-            //TODO/WARN: REGEX might not work! Check performance: EFCore is supposed to support this, AND sqlite supports it!
-
             if(!string.IsNullOrEmpty(search.NameLike))
-                query = query.Where(x => EF.Functions.Like(x.name, search.NameLike)); //x.name != null && regex.IsMatch(x.name)); //the stupid... ugh ORM makes me have to repeat this code. I think...
+                query = query.Where(x => EF.Functions.Like(x.name, search.NameLike));
 
             if(!string.IsNullOrEmpty(search.TypeLike))
                 query = query.Where(x => EF.Functions.Like(x.type, search.TypeLike));
@@ -61,7 +59,7 @@ namespace Randomous.EntitySystem
             query = ApplyGeneric<EntityValue>(query, search);
 
             if(!string.IsNullOrEmpty(search.KeyLike))
-                query = query.Where(x => EF.Functions.Like(x.key, search.KeyLike)); //.Contains(search.KeyLike));
+                query = query.Where(x => EF.Functions.Like(x.key, search.KeyLike));
 
             if(!string.IsNullOrEmpty(search.ValueLike))
                 query = query.Where(x => EF.Functions.Like(x.value, search.ValueLike));
