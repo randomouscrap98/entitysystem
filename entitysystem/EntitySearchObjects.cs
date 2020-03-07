@@ -20,8 +20,8 @@ namespace Randomous.EntitySystem
     /// </summary>
     public class EntitySearch:EntitySearchBase
     {
-        public string TypeRegex = "";
-        public string NameRegex = "";
+        public string TypeLike = "";
+        public string NameLike = "";
     }
 
     /// <summary>
@@ -34,8 +34,8 @@ namespace Randomous.EntitySystem
     /// </remarks>
     public class EntityValueSearch : EntitySearchBase
     {
-        public string KeyRegex = "";
-        public string ValueRegex = "";
+        public string KeyLike = "";
+        public string ValueLike = "";
         public List<long> EntityIds = new List<long>();
     }
 
@@ -44,7 +44,7 @@ namespace Randomous.EntitySystem
     /// </summary>
     public class EntityRelationSearch : EntitySearchBase
     {
-        public string TypeRegex;
+        public string TypeLike;
         //public List<string> Types = new List<string>();
         public List<long> EntityIds1 = new List<long>();
         public List<long> EntityIds2 = new List<long>();

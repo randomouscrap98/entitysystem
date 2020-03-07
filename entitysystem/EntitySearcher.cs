@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Randomous.EntitySystem
@@ -46,17 +47,11 @@ namespace Randomous.EntitySystem
             
             //TODO/WARN: REGEX might not work! Check performance: EFCore is supposed to support this, AND sqlite supports it!
 
-            if(!string.IsNullOrEmpty(search.NameRegex))
-            {
-                var regex = new Regex(search.NameRegex);
-                query = query.Where(x => x.name != null && regex.IsMatch(x.name)); //the stupid... ugh ORM makes me have to repeat this code. I think...
-            }
+            if(!string.IsNullOrEmpty(search.NameLike))
+                query = query.Where(x => EF.Functions.Like(x.name, search.NameLike)); //x.name != null && regex.IsMatch(x.name)); //the stupid... ugh ORM makes me have to repeat this code. I think...
 
-            if(!string.IsNullOrEmpty(search.TypeRegex))
-            {
-                var regex = new Regex(search.TypeRegex);
-                query = query.Where(x => x.type != null && regex.IsMatch(x.type));
-            }
+            if(!string.IsNullOrEmpty(search.TypeLike))
+                query = query.Where(x => EF.Functions.Like(x.type, search.TypeLike));
 
             return query;
         }
@@ -65,17 +60,11 @@ namespace Randomous.EntitySystem
         {
             query = ApplyGeneric<EntityValue>(query, search);
 
-            if(!string.IsNullOrEmpty(search.KeyRegex))
-            {
-                var regex = new Regex(search.KeyRegex);
-                query = query.Where(x => x.key != null && regex.IsMatch(x.key));
-            }
+            if(!string.IsNullOrEmpty(search.KeyLike))
+                query = query.Where(x => EF.Functions.Like(x.key, search.KeyLike)); //.Contains(search.KeyLike));
 
-            if(!string.IsNullOrEmpty(search.ValueRegex))
-            {
-                var regex = new Regex(search.ValueRegex);
-                query = query.Where(x => x.value != null && regex.IsMatch(x.value));
-            }
+            if(!string.IsNullOrEmpty(search.ValueLike))
+                query = query.Where(x => EF.Functions.Like(x.value, search.ValueLike));
 
             if(search.EntityIds.Count > 0)
                 query = query.Where(x => search.EntityIds.Contains(x.entityId));
@@ -87,11 +76,8 @@ namespace Randomous.EntitySystem
         {
             query = ApplyGeneric<EntityRelation>(query, search);
 
-            if(!string.IsNullOrEmpty(search.TypeRegex))
-            {
-                var regex = new Regex(search.TypeRegex);
-                query = query.Where(x => x.type != null && regex.IsMatch(x.type));
-            }
+            if(!string.IsNullOrEmpty(search.TypeLike))
+                query = query.Where(x => EF.Functions.Like(x.type, search.TypeLike));
 
             if(search.EntityIds1.Count > 0)
                 query = query.Where(x => search.EntityIds1.Contains(x.entityId1));

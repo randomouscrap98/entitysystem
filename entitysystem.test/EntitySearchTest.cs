@@ -148,27 +148,28 @@ namespace Randomous.EntitySystem.test
         [Fact]
         public void SearchEntityRelationDates() { SimpleDatesTest<EntityRelation, EntityRelationSearch>((s, e) => searcher.ApplyEntityRelationSearch(e, s)); }
 
-        protected Tuple<string, IQueryable<E>> SetupRegexTest<E>(Action<E, string> setField, IQueryable<E> entities) where E : EntityBase
+        protected Tuple<string, IQueryable<E>> SetupStringLikeTest<E>(Action<E, string> setField, IQueryable<E> entities) where E : EntityBase
         {
             var set = new Action<long, string>((i, s) => setField(entities.First(x => x.id == i), s));
 
             //Set some to have some names/types
             set(4, "one");
-            set(6, "One");
-            set(8, "oNE");
-            set(10, "ones");
+            set(6, "ones");
+            set(8, "lone");
+            set(10, "lones");
+            set(12, "lons");
 
             //Just for fun
             for(int i = 11; i < 20; i++)
                 set(i, "");
 
-            return Tuple.Create("^(?i:one)$", entities.Where(x => x.id == 4 || x.id == 6 || x.id == 8));
+            return Tuple.Create("%one%", entities.Where(x => x.id == 4 || x.id == 6 || x.id == 8 || x.id == 10));
         }
 
-        protected void SimpleRegexTest<E>(Action<E, string> setField, Func<string, IQueryable<E>, IQueryable<E>> doSearch) where E : EntityBase, new()
+        protected void SimpleStringLikeTest<E>(Action<E, string> setField, Func<string, IQueryable<E>, IQueryable<E>> doSearch) where E : EntityBase, new()
         {
             var entities = BasicDataset<E>();
-            var setup = SetupRegexTest(setField, entities);
+            var setup = SetupStringLikeTest(setField, entities);
             var result = doSearch(setup.Item1, entities);
             AssertResultsEqual(setup.Item2, result);
         }
@@ -176,40 +177,40 @@ namespace Randomous.EntitySystem.test
         [Fact]
         public void SearchEntityType()
         {
-            SimpleRegexTest<Entity>((e, s) => e.type = s, (s, e) => {
-                return searcher.ApplyEntitySearch(e, new EntitySearch() {TypeRegex = s});
+            SimpleStringLikeTest<Entity>((e, s) => e.type = s, (s, e) => {
+                return searcher.ApplyEntitySearch(e, new EntitySearch() {TypeLike = s});
             });
         }
 
         [Fact]
         public void SearchEntityName()
         {
-            SimpleRegexTest<Entity>((e, s) => e.name = s, (s, e) => {
-                return searcher.ApplyEntitySearch(e, new EntitySearch() {NameRegex= s});
+            SimpleStringLikeTest<Entity>((e, s) => e.name = s, (s, e) => {
+                return searcher.ApplyEntitySearch(e, new EntitySearch() {NameLike = s});
             });
         }
 
         [Fact]
         public void SearchRelationType()
         {
-            SimpleRegexTest<EntityRelation>((e, s) => e.type = s, (s, e) => {
-                return searcher.ApplyEntityRelationSearch(e, new EntityRelationSearch() {TypeRegex = s});
+            SimpleStringLikeTest<EntityRelation>((e, s) => e.type = s, (s, e) => {
+                return searcher.ApplyEntityRelationSearch(e, new EntityRelationSearch() {TypeLike= s});
             });
         }
 
         [Fact]
         public void SearchValueKey()
         {
-            SimpleRegexTest<EntityValue>((e, s) => e.key = s, (s, e) => {
-                return searcher.ApplyEntityValueSearch(e, new EntityValueSearch() {KeyRegex = s});
+            SimpleStringLikeTest<EntityValue>((e, s) => e.key = s, (s, e) => {
+                return searcher.ApplyEntityValueSearch(e, new EntityValueSearch() {KeyLike = s});
             });
         }
 
         [Fact]
         public void SearchValueValue()
         {
-            SimpleRegexTest<EntityValue>((e, s) => e.value = s, (s, e) => {
-                return searcher.ApplyEntityValueSearch(e, new EntityValueSearch() {ValueRegex= s});
+            SimpleStringLikeTest<EntityValue>((e, s) => e.value = s, (s, e) => {
+                return searcher.ApplyEntityValueSearch(e, new EntityValueSearch() {ValueLike = s});
             });
         }
     }
