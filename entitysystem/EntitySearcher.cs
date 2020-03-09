@@ -41,9 +41,31 @@ namespace Randomous.EntitySystem
             return query;
         }
 
+        /// <summary>
+        /// Apply generic final search parameters such as limit/skip/reverse
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="search"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public IQueryable<T> ApplyFinal<T>(IQueryable<T> query, EntitySearchBase search) where T : EntityBase
+        {
+            if(search.Reverse)
+                query = query.OrderByDescending(x => x.id);
+            else
+                query = query.OrderBy(x => x.id);
+
+            if(search.Skip >= 0)
+                query = query.Skip(search.Skip);
+            if(search.Limit >= 0)
+                query = query.Take(search.Limit);
+
+            return query;
+        }
+
         public IQueryable<Entity> ApplyEntitySearch(IQueryable<Entity> query, EntitySearch search)
         {
-            query = ApplyGeneric<Entity>(query, search);
+            query = ApplyGeneric(query, search);
             
             if(!string.IsNullOrEmpty(search.NameLike))
                 query = query.Where(x => EF.Functions.Like(x.name, search.NameLike));
@@ -51,12 +73,12 @@ namespace Randomous.EntitySystem
             if(!string.IsNullOrEmpty(search.TypeLike))
                 query = query.Where(x => EF.Functions.Like(x.type, search.TypeLike));
 
-            return query;
+            return ApplyFinal(query, search);
         }
 
         public IQueryable<EntityValue> ApplyEntityValueSearch(IQueryable<EntityValue> query, EntityValueSearch search)
         {
-            query = ApplyGeneric<EntityValue>(query, search);
+            query = ApplyGeneric(query, search);
 
             if(!string.IsNullOrEmpty(search.KeyLike))
                 query = query.Where(x => EF.Functions.Like(x.key, search.KeyLike));
@@ -67,7 +89,7 @@ namespace Randomous.EntitySystem
             if(search.EntityIds.Count > 0)
                 query = query.Where(x => search.EntityIds.Contains(x.entityId));
 
-            return query;
+            return ApplyFinal(query, search);
         }
 
         public IQueryable<EntityRelation> ApplyEntityRelationSearch(IQueryable<EntityRelation> query, EntityRelationSearch search)
@@ -83,7 +105,7 @@ namespace Randomous.EntitySystem
             if(search.EntityIds2.Count > 0)
                 query = query.Where(x => search.EntityIds2.Contains(x.entityId2));
 
-            return query;
+            return ApplyFinal(query, search);
         }
     }
 }

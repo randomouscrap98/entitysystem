@@ -13,6 +13,9 @@ namespace Randomous.EntitySystem
         public List<long> Ids = new List<long>();
         public DateTime CreateStart = new DateTime(0);
         public DateTime CreateEnd = new DateTime(0);
+        public int Limit = -1;
+        public int Skip = -1;
+        public bool Reverse = false;
     }
 
     /// <summary>

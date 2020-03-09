@@ -213,5 +213,51 @@ namespace Randomous.EntitySystem.test
                 return searcher.ApplyEntityValueSearch(e, new EntityValueSearch() {ValueLike = s});
             });
         }
+
+        protected void SimpleSkipLimitTest<E,S>(Func<S, IQueryable<E>, IQueryable<E>> applySearch) where E : EntityBase, new () where S : EntitySearchBase, new()
+        {
+            var entities = BasicDataset<E>();
+            var search = new S();
+
+            search.Limit = 10;
+            var result = applySearch(search, entities);
+            Assert.Equal(10, result.Count());
+
+            int counter = 1;
+            foreach(var e in result)
+                Assert.Equal(counter++, e.id);
+
+            search.Skip = 20;
+            result = applySearch(search, entities);
+            Assert.Equal(10, result.Count());
+
+            counter = 21;
+            foreach(var e in result)
+                Assert.Equal(counter++, e.id);
+
+            search.Reverse = true;
+            result = applySearch(search, entities);
+            Assert.Equal(10, result.Count());
+
+            counter = entities.Count() - 20;
+            foreach(var e in result)
+                Assert.Equal(counter--, e.id);
+        }
+
+        [Fact]
+        public void SearchBaseSkipLimit() { 
+            SimpleSkipLimitTest<EntityBase, EntitySearchBase>((s, e) => searcher.ApplyFinal<EntityBase>(e, s)); }
+
+        [Fact]
+        public void SearchEntitySkipLimit() { 
+            SimpleSkipLimitTest<Entity, EntitySearch>((s, e) => searcher.ApplyEntitySearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityValueSKipLimit() { 
+            SimpleSkipLimitTest<EntityValue, EntityValueSearch>((s, e) => searcher.ApplyEntityValueSearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityRelationSKipLimit() { 
+            SimpleSkipLimitTest<EntityRelation, EntityRelationSearch>((s, e) => searcher.ApplyEntityRelationSearch(e, s)); }
     }
 }
