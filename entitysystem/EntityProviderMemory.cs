@@ -51,9 +51,12 @@ namespace Randomous.EntitySystem
 
             foreach(var item in items)
             {
+                if(item.id == 0)
+                    item.id = AllItems.Count(x => x is E) + 1;
+
                 var existing = AllItems.FirstOrDefault(x => x is E && x.id == item.id);
 
-                if(existing != null)
+                if (existing != null)
                 {
                     item.createDate = existing.createDate;
                     AllItems.Remove(existing);

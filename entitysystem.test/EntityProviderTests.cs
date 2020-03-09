@@ -14,15 +14,15 @@ namespace Randomous.EntitySystem.test
     /// I don't care: I want to make sure the provider can operate as expected: can you write to it and then 
     /// read what you wrote? That's about all I care about.
     /// </remarks>
-    public class EntityProviderEfCoreTest: UnitTestBase
+    public abstract class EntityProviderBaseTest : UnitTestBase
     {
-        protected EntityProviderEfCore provider;
+        protected IEntityProvider provider;
 
-        public EntityProviderEfCoreTest()
-        {
-            provider = CreateService<EntityProviderEfCore>();
-            provider.context.Database.EnsureCreated();  
-        }
+        //public EntityPro()
+        //{
+        //    provider = CreateService<EntityProviderEfCore>();
+        //    (provider).context.Database.EnsureCreated();  
+        //}
 
         public Entity NewSingleEntity()
         {
@@ -63,6 +63,24 @@ namespace Randomous.EntitySystem.test
             Assert.Single(entities);
             Assert.Equal(entity, entities.First()); //assume this works correctly (is it safe to assume?)
         }
+
+        //WARN: CAN'T TRACK SAME THING FROM MULTIPLE PLACES!!! How will
+        //multithreading work?? 
+
+        //[Fact]
+        //public void NonTrackedUpdateTest()
+        //{
+        //    var entity = NewSingleEntity();
+        //    provider.WriteAsync<Entity>(new[] {entity}).Wait();
+        //    var newEntity = NewSingleEntity();
+        //    newEntity.id = entity.id;
+        //    newEntity.type = "NONEOFYOURBUSINESS";
+        //    provider.WriteAsync<Entity>(new[] {newEntity}).Wait(); //This SHOULD be just an update
+        //    var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
+        //    Assert.Single(entities);
+        //    Assert.Equal(newEntity, entities.First()); //assume this works correctly (is it safe to assume?)
+        //    //Assert.Equal(entities.First().createDate)
+        //}
 
         [Fact]
         public void ProviderMultiWriteTest()
@@ -134,6 +152,25 @@ namespace Randomous.EntitySystem.test
             var result = task.Result;
             Assert.Single(result);
             Assert.Equal(entity, result.First());
+        }
+    }
+
+    public class EntityProviderEfCoreTest : EntityProviderBaseTest
+    {
+        public EntityProviderEfCoreTest()
+        {
+            var p = CreateService<EntityProviderEfCore>();
+            p.context.Database.EnsureCreated();
+            provider = p;
+        }
+    }
+
+    public class EntityProviderMemoryTest : EntityProviderBaseTest
+    {
+
+        public EntityProviderMemoryTest()
+        {
+            provider = CreateService<EntityProviderMemory>();
         }
     }
 }
