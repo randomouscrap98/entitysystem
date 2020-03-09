@@ -13,7 +13,7 @@ namespace Randomous.EntitySystem
     {
         public ILogger logger;
 
-        public EntitySearcher(ILogger<EntitySearch> logger)
+        public EntitySearcher(ILogger<EntitySearcher> logger)
         {
             this.logger = logger;
         }

@@ -13,12 +13,8 @@ namespace Randomous.EntitySystem
         public int MaxRetrieve {get;set;} = 10000;
     }
 
-    public class EntityProviderEfCore : IEntityProvider
+    public class EntityProviderEfCore : EntityProviderBase, IEntityProvider
     {
-        protected ILogger logger;
-        protected IEntitySearcher searcher;
-        protected ISignaler<EntityBase> signaler;
-
         public DbContext context;
         public EntityProviderEfCoreConfig config;
 
@@ -79,7 +75,7 @@ namespace Randomous.EntitySystem
             if(results.Count > 0)
                 return results;
             else
-                return (await signaler.ListenAsync((e) => e is E && e.id > lastId && filter((E)e), maxWait)).Cast<E>().ToList();
+                return await ListenBase(lastId, filter, maxWait);
         }
     }
 }
