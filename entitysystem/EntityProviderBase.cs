@@ -16,5 +16,10 @@ namespace Randomous.EntitySystem
         {
             return (await signaler.ListenAsync((e) => e is E && e.id > lastId && filter((E)e), maxWait)).Cast<E>().ToList();
         }
+
+        public void FinalizeWrite<E>(IEnumerable<E> items) where E : EntityBase
+        {
+            signaler.SignalItems(items);
+        }
     }
 }

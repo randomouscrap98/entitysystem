@@ -39,7 +39,7 @@ namespace Randomous.EntitySystem
         {
             logger.LogTrace($"DeleteAsync called for {items.Count()} {typeof(E).Name} items");
             AllItems.RemoveAll(x => x is E && items.Any(y => y.id == x.id));
-            signaler.SignalItems(items); //This is the LAST time items will get signalled!
+            FinalizeWrite(items);
             return Task.CompletedTask;
         }
 
@@ -65,7 +65,7 @@ namespace Randomous.EntitySystem
                 AllItems.Add(item);
             }
 
-            signaler.SignalItems(items);
+            FinalizeWrite(items);
             return Task.CompletedTask;
         }
 

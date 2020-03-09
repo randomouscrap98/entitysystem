@@ -51,7 +51,7 @@ namespace Randomous.EntitySystem
             logger.LogTrace($"DeleteAsync called for {items.Count()} {typeof(E).Name} items");
             context.RemoveRange(items);
             await context.SaveChangesAsync();
-            signaler.SignalItems(items); //This is the LAST time items will get signalled!
+            FinalizeWrite(items);
         }
 
         public async virtual Task WriteAsync<E>(IEnumerable<E> items) where E : EntityBase
@@ -61,7 +61,7 @@ namespace Randomous.EntitySystem
             logger.LogTrace($"WriteAsync called for {items.Count()} {typeof(E).Name} items");
             context.UpdateRange(items);
             await context.SaveChangesAsync();
-            signaler.SignalItems(items);
+            FinalizeWrite(items);
         }
 
         public async Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<E, bool> filter = null) where E : EntityBase
