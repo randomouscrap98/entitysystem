@@ -11,6 +11,7 @@ namespace Randomous.EntitySystem
     {
         public DateTime CreateDate = DateTime.Now;
         public List<T> Signalers = new List<T>();
+        //public bool Cancelled = false;
         public Func<T, bool> Filter;
         public ManualResetEvent Signal = new ManualResetEvent(false);
 
@@ -34,7 +35,7 @@ namespace Randomous.EntitySystem
             this.logger = logger;
         }
 
-        public Dictionary<T, int> SignalItems(IEnumerable<T> items)
+        public Dictionary<T, int> SignalItems(IEnumerable<T> items) //, bool cancel)
         {
             logger.LogTrace($"SignalItems called for {items.Count()} items");
 
@@ -54,6 +55,7 @@ namespace Randomous.EntitySystem
                         //Signal this listener if any did. Increase signal count for each item 
                         if(signalItems.Count > 0)
                         {
+                            //listener.Cancelled = cancel;
                             listener.Signalers = signalItems;
                             listener.Signal.Set();
                             listener.Signalers.ForEach(x => result[x]++);
@@ -97,9 +99,15 @@ namespace Randomous.EntitySystem
                 {
                     //IF we got signaled, go ahead and return the signalers
                     if (await WaitForSignalAsync(listener, maxWait))
-                        return listener.Signalers; //new List<E>() { (E)listener.SignaledEntity };
+                    {
+                        //if(listener.Cancelled)
+                        //    throw new TaskCanceledException("The item");
+                        return listener.Signalers;
+                    }
                     else
+                    {
                         throw new TimeoutException($"Did not get signaled in time ({maxWait})");
+                    }
                 }
                 finally
                 {

@@ -86,6 +86,18 @@ namespace Randomous.EntitySystem.test
         }
 
         [Fact]
+        public void SimpleProviderDeleteTest()
+        {
+            var entity = NewSingleEntity();
+            provider.WriteAsync<Entity>(new[] {entity}).Wait();
+            var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
+            Assert.Equal(entity, entities.First());
+            provider.DeleteAsync(new[] {entity}).Wait();
+            entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
+            Assert.Empty(entities);
+        }
+
+        [Fact]
         public void ListenTest()
         {
             //We're listening on empty

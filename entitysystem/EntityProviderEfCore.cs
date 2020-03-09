@@ -50,6 +50,14 @@ namespace Randomous.EntitySystem
             return await searcher.ApplyEntityValueSearch(context.Set<EntityValue>(), search).Take(config.MaxRetrieve).ToListAsync();
         }
 
+        public async Task DeleteAsync<E>(IEnumerable<E> items) where E : EntityBase
+        {
+            logger.LogTrace($"DeleteAsync called for {items.Count()} {typeof(E).Name} items");
+            context.RemoveRange(items);
+            await context.SaveChangesAsync();
+            signaler.SignalItems(items); //This is the LAST time items will get signalled!
+        }
+
         public async virtual Task WriteAsync<E>(IEnumerable<E> items) where E : EntityBase
         {
             //Yes, we let efcore do all the work. if something weird happens... oh well. this class
