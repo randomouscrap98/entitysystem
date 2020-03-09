@@ -16,6 +16,17 @@ namespace Randomous.EntitySystem
         public int Limit = -1;
         public int Skip = -1;
         public bool Reverse = false;
+
+        public EntitySearchBase() {}
+        public EntitySearchBase(EntitySearchBase copy)
+        {
+            Ids = new List<long>(copy.Ids);
+            CreateStart = copy.CreateStart;
+            CreateEnd = copy.CreateEnd;
+            Limit = copy.Limit;
+            Skip = copy.Skip;
+            Reverse = copy.Reverse;
+        }
     }
 
     /// <summary>
@@ -25,6 +36,14 @@ namespace Randomous.EntitySystem
     {
         public string TypeLike = "";
         public string NameLike = "";
+
+        public EntitySearch() {}
+        public EntitySearch(EntitySearchBase copy) : base(copy) {}
+        public EntitySearch(EntitySearch copy) : base(copy)
+        {
+            TypeLike = copy.TypeLike;
+            NameLike = copy.NameLike;
+        }
     }
 
     /// <summary>
@@ -40,6 +59,15 @@ namespace Randomous.EntitySystem
         public string KeyLike = "";
         public string ValueLike = "";
         public List<long> EntityIds = new List<long>();
+
+        public EntityValueSearch() {}
+        public EntityValueSearch(EntitySearchBase copy) : base(copy) {}
+        public EntityValueSearch(EntityValueSearch copy) : base(copy)
+        {
+            KeyLike = copy.KeyLike;
+            ValueLike = copy.ValueLike;
+            EntityIds = new List<long>(copy.EntityIds);
+        }
     }
 
     /// <summary>
@@ -50,6 +78,15 @@ namespace Randomous.EntitySystem
         public string TypeLike;
         public List<long> EntityIds1 = new List<long>();
         public List<long> EntityIds2 = new List<long>();
+
+        public EntityRelationSearch() {}
+        public EntityRelationSearch(EntitySearchBase copy) : base(copy) {}
+        public EntityRelationSearch(EntityRelationSearch copy) : base(copy)
+        {
+            TypeLike = copy.TypeLike;
+            EntityIds1 = new List<long>(copy.EntityIds1);
+            EntityIds2 = new List<long>(copy.EntityIds2);
+        }
     }
 
 }
