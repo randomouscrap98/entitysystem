@@ -10,6 +10,8 @@ namespace Randomous.EntitySystem
     {
         public EntityProviderMemory(ILoggerFactory logFactory) 
         {
+            //No dependency injection here: nobody should know what we're doing because we're some magical in-memory tester class.
+            //Just assume it's a black box that works!
             this.searcher = new EntitySearcher(logFactory.CreateLogger<EntitySearcher>());
             this.logger = logFactory.CreateLogger<EntityProviderMemory>();
             this.signaler = new SignalSystem<EntityBase>(logFactory.CreateLogger<SignalSystem<EntityBase>>());
