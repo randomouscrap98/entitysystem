@@ -8,43 +8,28 @@ using Microsoft.Extensions.Logging;
 
 namespace Randomous.EntitySystem
 {
-    public class EntityProviderEfCoreConfig
-    {
-        public int MaxRetrieve {get;set;} = 10000;
-    }
+    //public class EntityProviderEfCoreConfig
+    //{
+    //    public int MaxRetrieve {get;set;} = 10000;
+    //}
 
     public class EntityProviderEfCore : EntityProviderBase, IEntityProvider
     {
         public DbContext context;
-        public EntityProviderEfCoreConfig config;
+        //public EntityProviderEfCoreConfig config;
 
         public EntityProviderEfCore(ILogger<EntityProviderEfCore> logger, IEntitySearcher searcher, 
-            DbContext context, ISignaler<EntityBase> signaler, EntityProviderEfCoreConfig config)
+            DbContext context, ISignaler<EntityBase> signaler) //, EntityProviderEfCoreConfig config)
         {
             this.searcher = searcher;
             this.logger = logger;
             this.context = context;
-            this.config = config;
+            //this.config = config;
             this.signaler = signaler;
         }
 
-        public async Task<List<Entity>> GetEntitiesAsync(EntitySearch search)
-        {
-            logger.LogTrace("GetEntitiesAsync called");
-            return await searcher.ApplyEntitySearch(context.Set<Entity>(), search).Take(config.MaxRetrieve).ToListAsync();
-        }
-
-        public async Task<List<EntityRelation>> GetEntityRelationsAsync(EntityRelationSearch search)
-        {
-            logger.LogTrace("GetEntityRelationsAsync called");
-            return await searcher.ApplyEntityRelationSearch(context.Set<EntityRelation>(), search).Take(config.MaxRetrieve).ToListAsync();
-        }
-
-        public async Task<List<EntityValue>> GetEntityValuesAsync(EntityValueSearch search)
-        {
-            logger.LogTrace("GetEntityValuesAsync called");
-            return await searcher.ApplyEntityValueSearch(context.Set<EntityValue>(), search).Take(config.MaxRetrieve).ToListAsync();
-        }
+        protected override IQueryable<E> GetQueryable<E>() { return context.Set<E>(); }
+        protected override async Task<List<E>> GetList<E>(IQueryable<E> query) { return await query.ToListAsync(); }
 
         public async Task DeleteAsync<E>(IEnumerable<E> items) where E : EntityBase
         {
@@ -62,20 +47,6 @@ namespace Randomous.EntitySystem
             context.UpdateRange(items);
             await context.SaveChangesAsync();
             FinalizeWrite(items);
-        }
-
-        public async Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<E, bool> filter = null) where E : EntityBase
-        {
-            logger.LogTrace($"ListenNewAsync called for lastId {lastId}, maxWait {maxWait}");
-            filter = filter ?? new Func<E, bool>((x) => true);
-
-            var results = await context.Set<E>().Where(x => x.id > lastId).Take(config.MaxRetrieve).ToListAsync();
-            results = results.Where(x => filter(x)).ToList(); //Maybe find a more elegant way to do this?
-
-            if(results.Count > 0)
-                return results;
-            else
-                return await ListenBase(lastId, filter, maxWait);
         }
     }
 }

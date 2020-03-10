@@ -17,23 +17,8 @@ namespace Randomous.EntitySystem
 
         public List<EntityBase> AllItems = new List<EntityBase>();
 
-        public Task<List<Entity>> GetEntitiesAsync(EntitySearch search)
-        {
-            logger.LogTrace("GetEntitiesAsync called");
-            return Task.FromResult(searcher.ApplyEntitySearch(AllItems.Where(x => x is Entity).Select(x => (Entity)x).AsQueryable(), search).ToList());
-        }
-
-        public Task<List<EntityRelation>> GetEntityRelationsAsync(EntityRelationSearch search)
-        {
-            logger.LogTrace("GetEntityRelationsAsync called");
-            return Task.FromResult(searcher.ApplyEntityRelationSearch(AllItems.Where(x => x is EntityRelation).Select(x => (EntityRelation)x).AsQueryable(), search).ToList());
-        }
-
-        public Task<List<EntityValue>> GetEntityValuesAsync(EntityValueSearch search)
-        {
-            logger.LogTrace("GetEntityValuesAsync called");
-            return Task.FromResult(searcher.ApplyEntityValueSearch(AllItems.Where(x => x is EntityValue).Select(x => (EntityValue)x).AsQueryable(), search).ToList());
-        }
+        protected override IQueryable<E> GetQueryable<E>() => AllItems.Where(x => x is E).Select(x => (E)x).AsQueryable();
+        protected override Task<List<E>> GetList<E>(IQueryable<E> query) => Task.FromResult(query.ToList());
 
         public Task DeleteAsync<E>(IEnumerable<E> items) where E : EntityBase
         {
@@ -67,20 +52,6 @@ namespace Randomous.EntitySystem
 
             FinalizeWrite(items);
             return Task.CompletedTask;
-        }
-
-        public async Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<E, bool> filter = null) where E : EntityBase
-        {
-            logger.LogTrace($"ListenNewAsync called for lastId {lastId}, maxWait {maxWait}");
-            filter = filter ?? new Func<E, bool>((x) => true);
-
-            var results = AllItems.Where(x => x is E && x.id > lastId).Select(x => (E)x).ToList();
-            results = results.Where(x => filter(x)).ToList(); //Maybe find a more elegant way to do this?
-
-            if(results.Count > 0)
-                return results;
-            else
-                return await ListenBase(lastId, filter, maxWait);
         }
     }
 }
