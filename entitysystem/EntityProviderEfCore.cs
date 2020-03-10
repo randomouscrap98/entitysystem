@@ -8,23 +8,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Randomous.EntitySystem
 {
-    //public class EntityProviderEfCoreConfig
-    //{
-    //    public int MaxRetrieve {get;set;} = 10000;
-    //}
-
     public class EntityProviderEfCore : EntityProviderBase, IEntityProvider
     {
         public DbContext context;
-        //public EntityProviderEfCoreConfig config;
 
         public EntityProviderEfCore(ILogger<EntityProviderEfCore> logger, IEntitySearcher searcher, 
-            DbContext context, ISignaler<EntityBase> signaler) //, EntityProviderEfCoreConfig config)
+            DbContext context, ISignaler<EntityBase> signaler)
         {
             this.searcher = searcher;
             this.logger = logger;
             this.context = context;
-            //this.config = config;
             this.signaler = signaler;
         }
 
