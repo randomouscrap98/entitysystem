@@ -28,6 +28,7 @@ namespace Randomous.EntitySystem.test
         {
             return new Entity()
             {
+                createDate = DateTime.Now,
                 type = "Yeah",
                 name = "The ENtity",
                 content = "A lot of content comes from here!"
