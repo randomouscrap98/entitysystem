@@ -30,14 +30,21 @@ CREATE INDEX IF NOT EXISTS "entityRelationId2Index" ON "EntityRelations" (
 CREATE INDEX IF NOT EXISTS "entityRelationTypeIndex" ON "EntityRelations" (
 	"type"
 );
+--This index is for quickly finding values for a given entity (ie finding 
+--all fields for a user or all fields for a content)
 CREATE INDEX IF NOT EXISTS "entityValueEntityIdIndex" ON "EntityValues" (
 	"entityId"
 );
-CREATE INDEX IF NOT EXISTS "entityValueKeyIndex" ON "EntityValues" (
-	"key"
-);
-CREATE INDEX IF NOT EXISTS "entityValueValueIndex" ON "EntityValues" (
-	"value"
+--This index is for quickly searching through values. Value table is MAINLY
+--for storing... values, so chances are you will want to search through it.
+--Notice secondary index "key"; most value lookups will be finding both key
+--AND value: like finding keywords will be value="thekeyword" and key="keyword".
+--Adding 'key' means it doesn't have to go index the table to find the key. 
+--For values with MANY mismatched keys, this could have a huge impact. For 
+--valaues that are mostly within the desired key, this won't have ANY impact,
+--since we still have to go to the table to get the rest of the data for the object
+CREATE INDEX IF NOT EXISTS "entityValueValueKeyIndex" ON "EntityValues" (
+	"value", "key"
 );
 CREATE INDEX IF NOT EXISTS "entityTypeIndex" ON "Entities" (
 	"type"
