@@ -14,10 +14,22 @@ namespace Randomous.EntitySystem
 
         protected abstract Task<List<E>> GetList<E>(IQueryable<E> query) where E : EntityBase;
         protected abstract IQueryable<E> GetQueryable<E>() where E : EntityBase;
+        public abstract Task WriteAsync<E>(params E[] entities) where E : EntityBase;
 
         public void FinalizeWrite<E>(IEnumerable<E> items) where E : EntityBase
         {
             signaler.SignalItems(items);
+        }
+
+        public async Task WriteAsync(params EntityPackage[] entities)
+        {
+            foreach(var entity in entities)
+            {
+                logger.LogDebug($"Writing entity package for {entity.Entity}");
+                await WriteAsync(entity.Entity);
+                await WriteAsync(entity.Values.SelectMany(x => x.Value).ToArray());
+                await WriteAsync(entity.ParentRelations.SelectMany(x => x.Value).ToArray());
+            }
         }
 
         public virtual async Task<List<Entity>> GetEntitiesAsync(EntitySearch search)
@@ -50,6 +62,42 @@ namespace Randomous.EntitySystem
                 return results;
             else
                 return (await signaler.ListenAsync((e) => e is E && e.id > lastId && filter((E)e), maxWait)).Cast<E>().ToList();
+        }
+
+        public Dictionary<K,List<V>> MagicSort<K,V>(IEnumerable<V> items, Func<V,K> keySelector)
+        {
+            var result = new Dictionary<K, List<V>>();
+            foreach(var item in items)
+            {
+                var key = keySelector(item);
+                if(!result.ContainsKey(key))
+                    result.Add(key, new List<V>());
+                result[key].Add(item);
+            }
+            return result;
+        }
+
+        public async Task<List<EntityPackage>> ExpandAsync(params Entity[] entities)
+        {
+            var results = new List<EntityPackage>();
+            var ids = entities.Select(x => x.id).ToList();
+
+            var valueSearch = new EntityValueSearch() { EntityIds = ids };
+            var relationSearch = new EntityRelationSearch() {EntityIds2 = ids };
+
+            //This is actually where the heavy lifting is.
+            var allValues = await GetEntityValuesAsync(valueSearch);
+            var allRelations = await GetEntityRelationsAsync(relationSearch);
+
+            foreach(var entity in entities)
+            {
+                var package = new EntityPackage();
+                package.Entity = entity;
+                package.Values = MagicSort(allValues.Where(x => x.entityId == entity.id), new Func<EntityValue, string>((v) => v.key));
+                package.ParentRelations = MagicSort(allRelations.Where(x => x.entityId2 == entity.id), new Func<EntityRelation, string>((v) => v.type));
+            }
+
+            return results;
         }
     }
 }

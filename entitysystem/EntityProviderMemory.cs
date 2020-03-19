@@ -22,7 +22,7 @@ namespace Randomous.EntitySystem
         protected override IQueryable<E> GetQueryable<E>() => AllItems.Where(x => x is E).Select(x => (E)x).AsQueryable();
         protected override Task<List<E>> GetList<E>(IQueryable<E> query) => Task.FromResult(query.ToList());
 
-        public Task DeleteAsync<E>(IEnumerable<E> items) where E : EntityBase
+        public Task DeleteAsync<E>(params E[] items) where E : EntityBase
         {
             logger.LogTrace($"DeleteAsync called for {items.Count()} {typeof(E).Name} items");
             AllItems.RemoveAll(x => x is E && items.Any(y => y.id == x.id));
@@ -30,10 +30,8 @@ namespace Randomous.EntitySystem
             return Task.CompletedTask;
         }
 
-        public virtual Task WriteAsync<E>(IEnumerable<E> items) where E : EntityBase
+        public override Task WriteAsync<E>(params E[] items) 
         {
-            //Yes, we let efcore do all the work. if something weird happens... oh well. this class
-            //isn't meant for safety... I think?
             logger.LogTrace($"WriteAsync called for {items.Count()} {typeof(E).Name} items");
 
             foreach(var item in items)

@@ -10,8 +10,9 @@ namespace Randomous.EntitySystem
         Task<List<EntityValue>> GetEntityValuesAsync(EntityValueSearch search);
         Task<List<EntityRelation>> GetEntityRelationsAsync(EntityRelationSearch search);
 
-        Task WriteAsync<E>(IEnumerable<E> entities) where E : EntityBase;
-        Task DeleteAsync<E>(IEnumerable<E> items) where E : EntityBase;
+        Task WriteAsync<E>(params E[] entities) where E : EntityBase;
+        Task WriteAsync(params EntityPackage[] entities);
+        Task DeleteAsync<E>(params E[] items) where E : EntityBase;
 
         /// <summary>
         /// 
@@ -27,5 +28,7 @@ namespace Randomous.EntitySystem
         /// <typeparam name="E"></typeparam>
         /// <returns></returns>
         Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<E, bool> filter = null) where E : EntityBase;
+
+        Task<List<EntityPackage>> ExpandAsync(params Entity[] entities);
     }
 }

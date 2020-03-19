@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,6 +48,12 @@ namespace Randomous.EntitySystem.test
             var services = CreateServices();
             var provider = services.BuildServiceProvider();
             return (T)ActivatorUtilities.CreateInstance(provider, typeof(T));
+        }
+
+        public T AssertWait<T>(Task<T> task)
+        {
+            Assert.True(task.Wait(2000));    //We should've gotten signaled. Give the test plenty of time to get the memo
+            return task.Result;    //This won't wait at all if the previous came through
         }
 
         [Fact]

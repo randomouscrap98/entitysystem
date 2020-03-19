@@ -18,12 +18,6 @@ namespace Randomous.EntitySystem.test
     {
         protected IEntityProvider provider;
 
-        //public EntityPro()
-        //{
-        //    provider = CreateService<EntityProviderEfCore>();
-        //    (provider).context.Database.EnsureCreated();  
-        //}
-
         public Entity NewSingleEntity()
         {
             return new Entity()
@@ -99,7 +93,7 @@ namespace Randomous.EntitySystem.test
             for(var i = 0; i < 10; i++)
                 writeEntries.Add(NewSingleEntity());
 
-            provider.WriteAsync<Entity>(writeEntries).Wait();
+            provider.WriteAsync<Entity>(writeEntries.ToArray()).Wait();
             entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Equal(20, entities.Count);
         }
@@ -126,15 +120,14 @@ namespace Randomous.EntitySystem.test
             //Add a new entity. This should complete the above task.
             var entity = NewSingleEntity();
             provider.WriteAsync<Entity>(new[] {entity}).Wait();
-            Assert.True(task.Wait(200));
 
-            var result = task.Result;
+            var result = AssertWait(task);
             Assert.Single(result);
             Assert.Equal(entity, result.First());
         }
 
         [Fact]
-        public void ListenLaterTest()
+        public virtual void ListenLaterTest()
         {
             var task = provider.ListenNewAsync<Entity>(5, TimeSpan.FromMinutes(1));
             Assert.False(task.IsCompleted);
@@ -142,15 +135,14 @@ namespace Randomous.EntitySystem.test
             for(var i = 0; i < 5; i++)
             {
                 provider.WriteAsync<Entity>(new[] {NewSingleEntity()}).Wait();
-                Assert.False(task.Wait(10));
+                Assert.False(task.Wait(10)); //This might be bad...? Some "assert true" tests failed after even 200ms of waiting, so these could be incorrectly false
                 Assert.False(task.IsCompleted);
             }
 
             var entity = NewSingleEntity();
             provider.WriteAsync<Entity>(new[] {entity}).Wait();
-            Assert.True(task.Wait(200));
 
-            var result = task.Result;
+            var result = AssertWait(task);
             Assert.Single(result);
             Assert.Equal(entity, result.First());
         }
@@ -168,10 +160,13 @@ namespace Randomous.EntitySystem.test
 
     public class EntityProviderMemoryTest : EntityProviderBaseTest
     {
-
         public EntityProviderMemoryTest()
         {
             provider = CreateService<EntityProviderMemory>();
         }
+
+        //When I want to test a function, this is what I have to do. Stupid... unit testing.
+        [Fact]
+        public override void ListenLaterTest() { base.ListenLaterTest(); }
     }
 }
