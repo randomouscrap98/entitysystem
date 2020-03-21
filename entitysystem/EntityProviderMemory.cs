@@ -12,9 +12,12 @@ namespace Randomous.EntitySystem
         {
             //No dependency injection here: nobody should know what we're doing because we're some magical in-memory tester class.
             //Just assume it's a black box that works!
-            this.searcher = new EntitySearcher(logFactory.CreateLogger<EntitySearcher>());
-            this.logger = logFactory.CreateLogger<EntityProviderMemory>();
-            this.signaler = new SignalSystem<EntityBase>(logFactory.CreateLogger<SignalSystem<EntityBase>>());
+            this.services = new EntityProviderBaseServices(
+                logFactory.CreateLogger<EntityProviderMemory>(),
+                new EntitySearcher(logFactory.CreateLogger<EntitySearcher>()),
+                new SignalSystem<EntityBase>(logFactory.CreateLogger<SignalSystem<EntityBase>>()),
+                new GeneralHelper()
+            );
         }
 
         public List<EntityBase> AllItems = new List<EntityBase>();
@@ -24,7 +27,7 @@ namespace Randomous.EntitySystem
 
         public Task DeleteAsync<E>(params E[] items) where E : EntityBase
         {
-            logger.LogTrace($"DeleteAsync called for {items.Count()} {typeof(E).Name} items");
+            services.Logger.LogTrace($"DeleteAsync called for {items.Count()} {typeof(E).Name} items");
             AllItems.RemoveAll(x => x is E && items.Any(y => y.id == x.id));
             FinalizeWrite(items);
             return Task.CompletedTask;
@@ -32,7 +35,7 @@ namespace Randomous.EntitySystem
 
         public override Task WriteAsync<E>(params E[] items) 
         {
-            logger.LogTrace($"WriteAsync called for {items.Count()} {typeof(E).Name} items");
+            services.Logger.LogTrace($"WriteAsync called for {items.Count()} {typeof(E).Name} items");
 
             foreach(var item in items)
             {

@@ -12,13 +12,10 @@ namespace Randomous.EntitySystem
     {
         public DbContext context;
 
-        public EntityProviderEfCore(ILogger<EntityProviderEfCore> logger, IEntitySearcher searcher, 
-            DbContext context, ISignaler<EntityBase> signaler)
+        public EntityProviderEfCore(EntityProviderBaseServices services, DbContext context)
         {
-            this.searcher = searcher;
-            this.logger = logger;
+            this.services = services;
             this.context = context;
-            this.signaler = signaler;
         }
 
         protected override IQueryable<E> GetQueryable<E>() { return context.Set<E>(); }
@@ -26,7 +23,7 @@ namespace Randomous.EntitySystem
 
         public async Task DeleteAsync<E>(params E[] items) where E : EntityBase
         {
-            logger.LogTrace($"DeleteAsync called for {items.Count()} {typeof(E).Name} items");
+            services.Logger.LogTrace($"DeleteAsync called for {items.Count()} {typeof(E).Name} items");
             context.RemoveRange(items);
             await context.SaveChangesAsync();
             FinalizeWrite(items);
@@ -36,7 +33,7 @@ namespace Randomous.EntitySystem
         {
             //Yes, we let efcore do all the work. if something weird happens... oh well. this class
             //isn't meant for safety... I think?
-            logger.LogTrace($"WriteAsync called for {items.Count()} {typeof(E).Name} items");
+            services.Logger.LogTrace($"WriteAsync called for {items.Count()} {typeof(E).Name} items");
             context.UpdateRange(items);
             await context.SaveChangesAsync();
             FinalizeWrite(items);

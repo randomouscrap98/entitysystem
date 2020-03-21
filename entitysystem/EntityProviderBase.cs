@@ -6,11 +6,32 @@ using Microsoft.Extensions.Logging;
 
 namespace Randomous.EntitySystem
 {
+    /// <summary>
+    /// A container of services for EntityProviderBase (to make life easier to derive from EntityProviderBase)
+    /// </summary>
+    public class EntityProviderBaseServices
+    {
+        public ILogger<EntityProviderBase> Logger;
+        public IEntitySearcher Searcher;
+        public ISignaler<EntityBase> Signaler;
+        public GeneralHelper Helper;
+
+        public EntityProviderBaseServices(ILogger<EntityProviderBase> logger, IEntitySearcher searcher, ISignaler<EntityBase> signaler, GeneralHelper helper)
+        {
+            this.Logger = logger;
+            this.Searcher = searcher;
+            this.Signaler = signaler;
+            this.Helper = helper;
+        }
+    }
+
+    /// <summary>
+    /// The basic framework for many kinds of IEntityProviders. NOT an IEntityProvider itself!
+    /// </summary>
     public abstract class EntityProviderBase
     {
-        protected ILogger logger;
-        protected IEntitySearcher searcher;
-        protected ISignaler<EntityBase> signaler;
+        //Note: there's no constructor because I'm doing something squirrely with EntityProviderMemory
+        protected EntityProviderBaseServices services;
 
         protected abstract Task<List<E>> GetList<E>(IQueryable<E> query) where E : EntityBase;
         protected abstract IQueryable<E> GetQueryable<E>() where E : EntityBase;
@@ -18,14 +39,14 @@ namespace Randomous.EntitySystem
 
         public void FinalizeWrite<E>(IEnumerable<E> items) where E : EntityBase
         {
-            signaler.SignalItems(items);
+            services.Signaler.SignalItems(items);
         }
 
         public async Task WriteAsync(params EntityPackage[] entities)
         {
             foreach(var entity in entities)
             {
-                logger.LogDebug($"Writing entity package for {entity.Entity}");
+                services.Logger.LogDebug($"Writing entity package for {entity.Entity}");
                 await WriteAsync(entity.Entity);
                 await WriteAsync(entity.Values.SelectMany(x => x.Value).ToArray());
                 await WriteAsync(entity.ParentRelations.SelectMany(x => x.Value).ToArray());
@@ -34,25 +55,25 @@ namespace Randomous.EntitySystem
 
         public virtual async Task<List<Entity>> GetEntitiesAsync(EntitySearch search)
         {
-            logger.LogTrace("GetEntitiesAsync called");
-            return await GetList(searcher.ApplyEntitySearch(GetQueryable<Entity>(), search));
+            services.Logger.LogTrace("GetEntitiesAsync called");
+            return await GetList(services.Searcher.ApplyEntitySearch(GetQueryable<Entity>(), search));
         }
 
         public async Task<List<EntityRelation>> GetEntityRelationsAsync(EntityRelationSearch search)
         {
-            logger.LogTrace("GetEntityRelationsAsync called");
-            return await GetList(searcher.ApplyEntityRelationSearch(GetQueryable<EntityRelation>(), search));
+            services.Logger.LogTrace("GetEntityRelationsAsync called");
+            return await GetList(services.Searcher.ApplyEntityRelationSearch(GetQueryable<EntityRelation>(), search));
         }
 
         public async Task<List<EntityValue>> GetEntityValuesAsync(EntityValueSearch search)
         {
-            logger.LogTrace("GetEntityValuesAsync called");
-            return await GetList(searcher.ApplyEntityValueSearch(GetQueryable<EntityValue>(), search));
+            services.Logger.LogTrace("GetEntityValuesAsync called");
+            return await GetList(services.Searcher.ApplyEntityValueSearch(GetQueryable<EntityValue>(), search));
         }
 
         public async Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<E, bool> filter = null) where E : EntityBase
         {
-            logger.LogTrace($"ListenNewAsync called for lastId {lastId}, maxWait {maxWait}");
+            services.Logger.LogTrace($"ListenNewAsync called for lastId {lastId}, maxWait {maxWait}");
             filter = filter ?? new Func<E, bool>((x) => true);
 
             var results = await GetList(GetQueryable<E>().Where(x => x.id > lastId).Select(x => (E)x));
@@ -61,20 +82,7 @@ namespace Randomous.EntitySystem
             if(results.Count > 0)
                 return results;
             else
-                return (await signaler.ListenAsync((e) => e is E && e.id > lastId && filter((E)e), maxWait)).Cast<E>().ToList();
-        }
-
-        public Dictionary<K,List<V>> MagicSort<K,V>(IEnumerable<V> items, Func<V,K> keySelector)
-        {
-            var result = new Dictionary<K, List<V>>();
-            foreach(var item in items)
-            {
-                var key = keySelector(item);
-                if(!result.ContainsKey(key))
-                    result.Add(key, new List<V>());
-                result[key].Add(item);
-            }
-            return result;
+                return (await services.Signaler.ListenAsync((e) => e is E && e.id > lastId && filter((E)e), maxWait)).Cast<E>().ToList();
         }
 
         public async Task<List<EntityPackage>> ExpandAsync(params Entity[] entities)
@@ -93,8 +101,8 @@ namespace Randomous.EntitySystem
             {
                 var package = new EntityPackage();
                 package.Entity = entity;
-                package.Values = MagicSort(allValues.Where(x => x.entityId == entity.id), new Func<EntityValue, string>((v) => v.key));
-                package.ParentRelations = MagicSort(allRelations.Where(x => x.entityId2 == entity.id), new Func<EntityRelation, string>((v) => v.type));
+                package.Values = services.Helper.MagicSort(allValues.Where(x => x.entityId == entity.id), new Func<EntityValue, string>((v) => v.key));
+                package.ParentRelations = services.Helper.MagicSort(allRelations.Where(x => x.entityId2 == entity.id), new Func<EntityRelation, string>((v) => v.type));
             }
 
             return results;

@@ -34,12 +34,14 @@ namespace Randomous.EntitySystem.test
 
             var services = new ServiceCollection();
             services.AddLogging(configure => configure.AddSerilog(new LoggerConfiguration().WriteTo.File($"{GetType()}.txt").CreateLogger()));
+            services.AddSingleton(new GeneralHelper());
             services.AddTransient<IEntitySearcher, EntitySearcher>();
             services.AddTransient<IEntityProvider, EntityProviderEfCore>();
+            services.AddTransient<EntityProviderBaseServices>();
+            services.AddTransient<ISignaler<EntityBase>, SignalSystem<EntityBase>>();
             services.AddDbContext<BaseEntityContext>(options => options.UseSqlite(connection).EnableSensitiveDataLogging(true));
             services.AddScoped<DbContext, BaseEntityContext>();
             //services.AddSingleton(new EntityProviderEfCoreConfig());
-            services.AddTransient<ISignaler<EntityBase>, SignalSystem<EntityBase>>();
             return services;
         }
 
