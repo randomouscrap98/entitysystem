@@ -222,6 +222,43 @@ namespace Randomous.EntitySystem.test
             Assert.Single(expanded);
             Assert.Equal(package, expanded.First());
         }
+
+        [Fact]
+        public virtual void EntityPackageExpandRewrite()
+        {
+            //This creates a package with 1 value and 1 relation
+            var package = NewPackage();
+            provider.WriteAsync(package).Wait();
+
+            var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
+            var expanded = provider.ExpandAsync(result.First()).Result.First();
+            expanded.Values.First().Value.First().value = "lolButts";
+            provider.WriteAsync(expanded).Wait();
+
+            result = provider.GetEntitiesAsync(new EntitySearch()).Result;
+            var expanded2 = provider.ExpandAsync(result.First()).Result;
+            Assert.Single(expanded2);
+            Assert.Equal(expanded, expanded2.First());
+        }
+
+        [Fact]
+        public virtual void EntityPackageBiggerExpand()
+        {
+            //This creates a package with 1 value and 1 relation
+            var package = NewPackage();
+            provider.AddValues(package, NewValue(), NewValue(), NewValue());
+            provider.AddRelations(package, NewRelation(), NewRelation(), NewRelation());
+            provider.WriteAsync(package).Wait();
+            Assert.True(package.Entity.id > 0);
+
+            var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
+            Assert.Single(result);
+            Assert.Equal(package.Entity, result.First());
+
+            var expanded = provider.ExpandAsync(result.First()).Result;
+            Assert.Single(expanded);
+            Assert.Equal(package, expanded.First());
+        }
     }
 
     public class EntityProviderEfCoreTest : EntityProviderBaseTest
