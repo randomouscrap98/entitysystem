@@ -37,6 +37,10 @@ namespace Randomous.EntitySystem
         protected abstract IQueryable<E> GetQueryable<E>() where E : EntityBase;
         public abstract Task WriteAsync<E>(params E[] entities) where E : EntityBase;
 
+        
+        protected string EntityValueKey(EntityValue value) { return value.key; }
+        protected string EntityRelationKey(EntityRelation relation) { return relation.type; }
+
         public void FinalizeWrite<E>(IEnumerable<E> items) where E : EntityBase
         {
             services.Signaler.SignalItems(items);
@@ -47,9 +51,23 @@ namespace Randomous.EntitySystem
             foreach(var entity in entities)
             {
                 services.Logger.LogDebug($"Writing entity package for {entity.Entity}");
+
                 await WriteAsync(entity.Entity);
-                await WriteAsync(entity.Values.SelectMany(x => x.Value).ToArray());
-                await WriteAsync(entity.ParentRelations.SelectMany(x => x.Value).ToArray());
+
+                //Warn: NOW that the entity has been written, it should have an id. MAKE SURE the relations and whatnot are linked to this!
+                var values = entity.Values.SelectMany(x => x.Value).ToArray();
+                var relations = entity.ParentRelations.SelectMany(x => x.Value).ToArray();
+
+                foreach(var value in values)
+                    if(value.entityId == 0)
+                        value.entityId = entity.Entity.id;
+
+                foreach(var relation in relations)
+                    if(relation.entityId2 == 0)
+                        relation.entityId2 = entity.Entity.id;
+
+                await WriteAsync(values);
+                await WriteAsync(relations);
             }
         }
 
@@ -85,6 +103,16 @@ namespace Randomous.EntitySystem
                 return (await services.Signaler.ListenAsync((e) => e is E && e.id > lastId && filter((E)e), maxWait)).Cast<E>().ToList();
         }
 
+        public void AddValues(EntityPackage package, params EntityValue[] values)
+        {
+            services.Helper.MagicSort(values, EntityValueKey, package.Values);
+        }
+
+        public void AddRelations(EntityPackage package, params EntityRelation[] relations)
+        {
+            services.Helper.MagicSort(relations, EntityRelationKey, package.ParentRelations);
+        }
+
         public async Task<List<EntityPackage>> ExpandAsync(params Entity[] entities)
         {
             var results = new List<EntityPackage>();
@@ -101,8 +129,9 @@ namespace Randomous.EntitySystem
             {
                 var package = new EntityPackage();
                 package.Entity = entity;
-                package.Values = services.Helper.MagicSort(allValues.Where(x => x.entityId == entity.id), new Func<EntityValue, string>((v) => v.key));
-                package.ParentRelations = services.Helper.MagicSort(allRelations.Where(x => x.entityId2 == entity.id), new Func<EntityRelation, string>((v) => v.type));
+                AddValues(package, allValues.Where(x => x.entityId == entity.id).ToArray());
+                AddRelations(package, allRelations.Where(x => x.entityId2 == entity.id).ToArray());
+                results.Add(package);
             }
 
             return results;

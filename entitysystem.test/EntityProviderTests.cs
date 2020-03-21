@@ -18,7 +18,7 @@ namespace Randomous.EntitySystem.test
     {
         protected IEntityProvider provider;
 
-        public Entity NewSingleEntity()
+        public Entity NewEntity()
         {
             return new Entity()
             {
@@ -29,19 +29,50 @@ namespace Randomous.EntitySystem.test
             };
         }
 
+        public EntityValue NewValue()
+        {
+            return new EntityValue()
+            {
+                createDate = DateTime.Now,
+                key = "someKey",
+                value = "some value"
+            };
+        }
+
+        public EntityRelation NewRelation()
+        {
+            return new EntityRelation()
+            {
+                createDate = DateTime.Now,
+                entityId1 = 5, //Just some value; foreign key constraints shouldn't be present I think!!
+                type = "someType",
+                value = "some relation value"
+            };
+        }
+
+        public EntityPackage NewPackage()
+        {
+            var package = new EntityPackage() { Entity = NewEntity()};
+            var value = NewValue();
+            var relation = NewRelation();
+            provider.AddValues(package, value);
+            provider.AddRelations(package, relation);
+            return package;
+        }
+
         [Fact]
         public void SimpleProviderWriteTest()
         {
             //Can we insert objects and get them out?
-            provider.WriteAsync<Entity>(new[] {NewSingleEntity()}).Wait();
+            provider.WriteAsync(NewEntity()).Wait();
         }
 
         [Fact]
         public void SimpleProviderReadTest()
         {
             //Can we insert objects and get them out?
-            var entity = NewSingleEntity();
-            provider.WriteAsync<Entity>(new[] {entity}).Wait();
+            var entity = NewEntity();
+            provider.WriteAsync(entity).Wait();
             var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Equal(entity, entities.First());
             //NOTE: this also assumes entity id is written!
@@ -50,10 +81,10 @@ namespace Randomous.EntitySystem.test
         [Fact]
         public void SimpleProviderUpdateTest()
         {
-            var entity = NewSingleEntity();
-            provider.WriteAsync<Entity>(new[] {entity}).Wait();
+            var entity = NewEntity();
+            provider.WriteAsync(entity).Wait();
             entity.type = "NONEOFYOURBUSINESS";
-            provider.WriteAsync<Entity>(new[] {entity}).Wait(); //This SHOULD be just an update
+            provider.WriteAsync(entity).Wait(); //This SHOULD be just an update
             var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Single(entities);
             Assert.Equal(entity, entities.First()); //assume this works correctly (is it safe to assume?)
@@ -82,7 +113,7 @@ namespace Randomous.EntitySystem.test
         {
             //Can we insert objects and get them out?
             for(var i = 0; i < 10; i++)
-                provider.WriteAsync<Entity>(new[] {NewSingleEntity()}).Wait();
+                provider.WriteAsync(NewEntity()).Wait();
 
             var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Equal(10, entities.Count);
@@ -91,9 +122,9 @@ namespace Randomous.EntitySystem.test
             var writeEntries = new List<Entity>();
 
             for(var i = 0; i < 10; i++)
-                writeEntries.Add(NewSingleEntity());
+                writeEntries.Add(NewEntity());
 
-            provider.WriteAsync<Entity>(writeEntries.ToArray()).Wait();
+            provider.WriteAsync(writeEntries.ToArray()).Wait();
             entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Equal(20, entities.Count);
         }
@@ -101,11 +132,11 @@ namespace Randomous.EntitySystem.test
         [Fact]
         public void SimpleProviderDeleteTest()
         {
-            var entity = NewSingleEntity();
-            provider.WriteAsync<Entity>(new[] {entity}).Wait();
+            var entity = NewEntity();
+            provider.WriteAsync(entity).Wait();
             var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Equal(entity, entities.First());
-            provider.DeleteAsync(new[] {entity}).Wait();
+            provider.DeleteAsync(entity).Wait();
             entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
             Assert.Empty(entities);
         }
@@ -118,8 +149,8 @@ namespace Randomous.EntitySystem.test
             Assert.False(task.IsCompleted);
 
             //Add a new entity. This should complete the above task.
-            var entity = NewSingleEntity();
-            provider.WriteAsync<Entity>(new[] {entity}).Wait();
+            var entity = NewEntity();
+            provider.WriteAsync(entity).Wait();
 
             var result = AssertWait(task);
             Assert.Single(result);
@@ -134,17 +165,62 @@ namespace Randomous.EntitySystem.test
 
             for(var i = 0; i < 5; i++)
             {
-                provider.WriteAsync<Entity>(new[] {NewSingleEntity()}).Wait();
+                provider.WriteAsync(NewEntity()).Wait();
                 Assert.False(task.Wait(10)); //This might be bad...? Some "assert true" tests failed after even 200ms of waiting, so these could be incorrectly false
                 Assert.False(task.IsCompleted);
             }
 
-            var entity = NewSingleEntity();
-            provider.WriteAsync<Entity>(new[] {entity}).Wait();
+            var entity = NewEntity();
+            provider.WriteAsync(entity).Wait();
 
             var result = AssertWait(task);
             Assert.Single(result);
             Assert.Equal(entity, result.First());
+        }
+
+        [Fact]
+        public virtual void SingleEntityPackageWrite()
+        {
+            //See if you can even write a SINGLE entity within a package
+            provider.WriteAsync(new EntityPackage() { Entity = NewEntity()}).Wait();
+        }
+
+        [Fact]
+        public virtual void SimpleEntityPackageWrite()
+        {
+            //This creates a package with 1 value and 1 relation
+            var package = NewPackage();
+            provider.WriteAsync(package).Wait();
+        }
+
+        [Fact]
+        public virtual void SimpleEntityPackageRead()
+        {
+            //This creates a package with 1 value and 1 relation
+            var package = NewPackage();
+            provider.WriteAsync(package).Wait();
+            Assert.True(package.Entity.id > 0);
+
+            var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
+            Assert.Single(result);
+            Assert.Equal(package.Entity, result.First());
+        }
+
+        [Fact]
+        public virtual void SimpleEntityPackageExpand()
+        {
+            //This creates a package with 1 value and 1 relation
+            var package = NewPackage();
+            provider.WriteAsync(package).Wait();
+            Assert.True(package.Entity.id > 0);
+
+            var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
+            Assert.Single(result);
+            Assert.Equal(package.Entity, result.First());
+
+            var expanded = provider.ExpandAsync(result.First()).Result;
+            Assert.Single(expanded);
+            Assert.Equal(package, expanded.First());
         }
     }
 
@@ -168,5 +244,8 @@ namespace Randomous.EntitySystem.test
         //When I want to test a function, this is what I have to do. Stupid... unit testing.
         [Fact]
         public override void ListenLaterTest() { base.ListenLaterTest(); }
+
+        [Fact]
+        public override void SimpleEntityPackageExpand() { base.SimpleEntityPackageExpand(); }
     }
 }

@@ -102,6 +102,31 @@ namespace Randomous.EntitySystem
             return values[key].First();
         }
 
+        public override int GetHashCode()
+        {
+            return Entity.id.GetHashCode();
+        }
+
+        protected List<T> SetupForEquality<T>(Dictionary<string, List<T>> dic) where T : EntityBase
+        {
+            return dic.SelectMany(x => x.Value).OrderBy(x => x.id).ToList();
+        }
+
+        public bool Equals(EntityPackage package)
+        {
+            return Entity.Equals(package.Entity) && 
+                SetupForEquality(Values).SequenceEqual(SetupForEquality(package.Values)) &&
+                SetupForEquality(ParentRelations).SequenceEqual(SetupForEquality(package.ParentRelations));
+        }
+
+        public override bool Equals(object obj)
+        {
+            if(obj != null && obj is EntityPackage) //this.GetType().Equals(obj.GetType()))
+                return Equals((EntityPackage)obj); //EqualsSelf(obj);
+            else
+                return false;
+        }
+
         public EntityValue GetValue(string key) { return BasicGrab(Values, key); }
         public EntityRelation GetRelation(string type) { return BasicGrab(ParentRelations, type); }
     }

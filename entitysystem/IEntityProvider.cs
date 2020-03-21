@@ -29,6 +29,9 @@ namespace Randomous.EntitySystem
         /// <returns></returns>
         Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<E, bool> filter = null) where E : EntityBase;
 
+        void AddValues(EntityPackage package, params EntityValue[] values);
+        void AddRelations(EntityPackage package, params EntityRelation[] relations);
+
         Task<List<EntityPackage>> ExpandAsync(params Entity[] entities);
     }
 }
