@@ -15,11 +15,11 @@ namespace Randomous.EntitySystem.test
     /// keep the database from becoming TOO generic and simplify use; with builtin types, names, content etc, the
     /// system may very well have what you need out of the box.
     /// </remarks>
-    public class EntitySearchTest : UnitTestBase
+    public class TestEntitySearcher : UnitTestBase
     {
         protected EntitySearcher searcher;
 
-        public EntitySearchTest()
+        public TestEntitySearcher()
         {
             searcher = CreateService<EntitySearcher>();
         }

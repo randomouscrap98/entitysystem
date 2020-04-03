@@ -3,11 +3,11 @@ using Xunit;
 
 namespace Randomous.EntitySystem.test
 {
-    public class GeneralHelperTest : UnitTestBase
+    public class TestGeneralHelper : UnitTestBase
     {
         protected GeneralHelper helper;
 
-        public GeneralHelperTest()
+        public TestGeneralHelper()
         {
             helper = new GeneralHelper();
         }

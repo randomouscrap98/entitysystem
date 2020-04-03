@@ -6,11 +6,11 @@ using Xunit;
 
 namespace Randomous.EntitySystem.test
 {
-    public class SignalSystemTest : UnitTestBase
+    public class TestSignalSystem : UnitTestBase
     {
         protected SignalSystem<int> signaler;
 
-        public SignalSystemTest()
+        public TestSignalSystem()
         {
             signaler = CreateService<SignalSystem<int>>();
         }

@@ -41,7 +41,6 @@ namespace Randomous.EntitySystem.test
             services.AddTransient<ISignaler<EntityBase>, SignalSystem<EntityBase>>();
             services.AddDbContext<BaseEntityContext>(options => options.UseSqlite(connection).EnableSensitiveDataLogging(true));
             services.AddScoped<DbContext, BaseEntityContext>();
-            //services.AddSingleton(new EntityProviderEfCoreConfig());
             return services;
         }
 
@@ -49,20 +48,13 @@ namespace Randomous.EntitySystem.test
         {
             var services = CreateServices();
             var provider = services.BuildServiceProvider();
-            return (T)ActivatorUtilities.CreateInstance(provider, typeof(T));
+            return (T)ActivatorUtilities.GetServiceOrCreateInstance(provider, typeof(T));
         }
 
         public T AssertWait<T>(Task<T> task)
         {
             Assert.True(task.Wait(2000));    //We should've gotten signaled. Give the test plenty of time to get the memo
             return task.Result;    //This won't wait at all if the previous came through
-        }
-
-        [Fact]
-        public void TestCreateService()
-        {
-            var provider = CreateService<EntityProviderEfCore>();
-            Assert.NotNull(provider);
         }
 
         protected void AssertResultsEqual<T>(IEnumerable<T> expected, IEnumerable<T> result)

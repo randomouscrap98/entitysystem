@@ -14,7 +14,7 @@ namespace Randomous.EntitySystem.test
     /// I don't care: I want to make sure the provider can operate as expected: can you write to it and then 
     /// read what you wrote? That's about all I care about.
     /// </remarks>
-    public abstract class EntityProviderBaseTest : UnitTestBase
+    public abstract class BaseTestEntityProvider : UnitTestBase
     {
         protected IEntityProvider provider;
 
@@ -261,9 +261,9 @@ namespace Randomous.EntitySystem.test
         }
     }
 
-    public class EntityProviderEfCoreTest : EntityProviderBaseTest
+    public class TestEntityProviderEfCore : BaseTestEntityProvider
     {
-        public EntityProviderEfCoreTest()
+        public TestEntityProviderEfCore()
         {
             var p = CreateService<EntityProviderEfCore>();
             p.context.Database.EnsureCreated();
@@ -271,9 +271,9 @@ namespace Randomous.EntitySystem.test
         }
     }
 
-    public class EntityProviderMemoryTest : EntityProviderBaseTest
+    public class TestEntityProviderMemory : BaseTestEntityProvider
     {
-        public EntityProviderMemoryTest()
+        public TestEntityProviderMemory()
         {
             provider = CreateService<EntityProviderMemory>();
         }

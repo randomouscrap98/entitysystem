@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Randomous.EntitySystem.test
 {
-    public class EqualityTest : UnitTestBase
+    public class TestEquality : UnitTestBase
     {
         [Fact]
         public void TestEntityBaseEquality()
