@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Randomous.EntitySystem
+namespace Randomous.EntitySystem.Implementations
 {
     /// <summary>
     /// A simple queryable reducer for various entity searches. Narrows a query

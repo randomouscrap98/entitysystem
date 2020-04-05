@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Randomous.EntitySystem.Implementations;
 using Xunit;
 
 namespace Randomous.EntitySystem.test

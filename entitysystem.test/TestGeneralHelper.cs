@@ -1,4 +1,5 @@
 using System;
+using Randomous.EntitySystem.Implementations;
 using Xunit;
 
 namespace Randomous.EntitySystem.test

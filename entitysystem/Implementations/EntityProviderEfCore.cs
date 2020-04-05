@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Randomous.EntitySystem
+namespace Randomous.EntitySystem.Implementations
 {
     public class EntityProviderEfCore : EntityProviderBase, IEntityProvider
     {

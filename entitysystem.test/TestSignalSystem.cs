@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Randomous.EntitySystem.Implementations;
 using Xunit;
 
 namespace Randomous.EntitySystem.test

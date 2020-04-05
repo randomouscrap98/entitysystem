@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace Randomous.EntitySystem
+namespace Randomous.EntitySystem.Implementations
 {
     /// <summary>
     /// A container of services for EntityProviderBase (to make life easier to derive from EntityProviderBase)

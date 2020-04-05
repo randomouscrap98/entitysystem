@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Randomous.EntitySystem
+namespace Randomous.EntitySystem.Implementations
 {
     public class GeneralHelper
     {
