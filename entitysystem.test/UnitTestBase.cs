@@ -17,6 +17,13 @@ namespace Randomous.EntitySystem.test
         public List<SqliteConnection> connections = new List<SqliteConnection>();
         public string SqliteConnectionString = "Data Source=:memory:;";
 
+        protected DefaultServiceProvider serviceProvider;
+
+        public UnitTestBase()
+        {
+            serviceProvider = new DefaultServiceProvider();
+        }
+
         public void Dispose()
         {
             foreach(var con in connections)
@@ -35,13 +42,8 @@ namespace Randomous.EntitySystem.test
 
             var services = new ServiceCollection();
             services.AddLogging(configure => configure.AddSerilog(new LoggerConfiguration().WriteTo.File($"{GetType()}.txt").CreateLogger()));
-            services.AddSingleton(new GeneralHelper());
-            services.AddTransient<IEntitySearcher, EntitySearcher>();
-            services.AddTransient<IEntityProvider, EntityProviderEfCore>();
-            services.AddTransient<EntityProviderBaseServices>();
-            services.AddTransient<ISignaler<EntityBase>, SignalSystem<EntityBase>>();
-            services.AddDbContext<BaseEntityContext>(options => options.UseSqlite(connection).EnableSensitiveDataLogging(true));
-            services.AddScoped<DbContext, BaseEntityContext>();
+            serviceProvider.AddDefaultServices(services, options => options.UseSqlite(connection).EnableSensitiveDataLogging(true));
+
             return services;
         }
 
