@@ -10,12 +10,12 @@ namespace Randomous.EntitySystem
     /// </summary>
     public class EntitySearchBase
     {
-        public List<long> Ids = new List<long>();
-        public DateTime CreateStart = new DateTime(0);
-        public DateTime CreateEnd = new DateTime(0);
-        public int Limit = -1;
-        public int Skip = -1;
-        public bool Reverse = false;
+        public List<long> Ids {get;set;} = new List<long>();
+        public DateTime CreateStart {get;set;} = new DateTime(0);
+        public DateTime CreateEnd {get;set;} = new DateTime(0);
+        public int Limit {get;set;} = -1;
+        public int Skip {get;set;} = -1;
+        public bool Reverse {get;set;} = false;
     }
 
     /// <summary>
@@ -23,8 +23,8 @@ namespace Randomous.EntitySystem
     /// </summary>
     public class EntitySearch:EntitySearchBase
     {
-        public string TypeLike = "";
-        public string NameLike = "";
+        public string TypeLike {get;set;} = "";
+        public string NameLike {get;set;} = "";
     }
 
     /// <summary>
@@ -37,9 +37,9 @@ namespace Randomous.EntitySystem
     /// </remarks>
     public class EntityValueSearch : EntitySearchBase
     {
-        public string KeyLike = "";
-        public string ValueLike = "";
-        public List<long> EntityIds = new List<long>();
+        public string KeyLike {get;set;} = "";
+        public string ValueLike {get;set;} = "";
+        public List<long> EntityIds {get;set;} = new List<long>();
     }
 
     /// <summary>
@@ -47,9 +47,9 @@ namespace Randomous.EntitySystem
     /// </summary>
     public class EntityRelationSearch : EntitySearchBase
     {
-        public string TypeLike;
-        public List<long> EntityIds1 = new List<long>();
-        public List<long> EntityIds2 = new List<long>();
+        public string TypeLike {get;set;} = "";
+        public List<long> EntityIds1 {get;set;} = new List<long>();
+        public List<long> EntityIds2 {get;set;} = new List<long>();
     }
 
 }
