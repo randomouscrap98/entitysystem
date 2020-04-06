@@ -143,44 +143,7 @@ namespace Randomous.EntitySystem.test
 //        //    Assert.Equal(newEntity, entities.First()); //assume this works correctly (is it safe to assume?)
 //        //    //Assert.Equal(entities.First().createDate)
 //        //}
-//
-//        [Fact]
-//        public void ListenTest()
-//        {
-//            //We're listening on empty
-//            var task = provider.ListenNewAsync<Entity>(0, TimeSpan.FromMinutes(1));
-//            Assert.False(task.IsCompleted);
-//
-//            //Add a new entity. This should complete the above task.
-//            var entity = NewEntity();
-//            provider.WriteAsync(entity).Wait();
-//
-//            var result = AssertWait(task);
-//            Assert.Single(result);
-//            Assert.Equal(entity, result.First());
-//        }
-//
-//        [Fact]
-//        public virtual void ListenLaterTest()
-//        {
-//            var task = provider.ListenNewAsync<Entity>(5, TimeSpan.FromMinutes(1));
-//            Assert.False(task.IsCompleted);
-//
-//            for(var i = 0; i < 5; i++)
-//            {
-//                provider.WriteAsync(NewEntity()).Wait();
-//                Assert.False(task.Wait(10)); //This might be bad...? Some "assert true" tests failed after even 200ms of waiting, so these could be incorrectly false
-//                Assert.False(task.IsCompleted);
-//            }
-//
-//            var entity = NewEntity();
-//            provider.WriteAsync(entity).Wait();
-//
-//            var result = AssertWait(task);
-//            Assert.Single(result);
-//            Assert.Equal(entity, result.First());
-//        }
-//
+
 //        //[Fact]
 //        //public virtual void SingleEntityPackageWrite()
 //        //{
@@ -262,30 +225,5 @@ namespace Randomous.EntitySystem.test
 //        //    Assert.Single(expanded);
 //        //    Assert.Equal(package, expanded.First());
 //        //}
-//    }
-//
-//    public class TestEntityProviderEfCore : BaseTestEntityProvider
-//    {
-//        public TestEntityProviderEfCore()
-//        {
-//            var p = CreateService<EntityProviderEfCore>();
-//            p.context.Database.EnsureCreated();
-//            provider = p;
-//        }
-//    }
-//
-//    public class TestEntityProviderMemory : BaseTestEntityProvider
-//    {
-//        public TestEntityProviderMemory()
-//        {
-//            provider = CreateService<EntityProviderMemory>();
-//        }
-//
-//        //When I want to test a function, this is what I have to do. Stupid... unit testing.
-//        [Fact]
-//        public override void ListenLaterTest() { base.ListenLaterTest(); }
-//
-//        [Fact]
-//        public override void SimpleEntityPackageExpand() { base.SimpleEntityPackageExpand(); }
 //    }
 //}
