@@ -12,6 +12,7 @@ namespace Randomous.EntitySystem.Implementations
             services.AddTransient<IEntitySearcher, EntitySearcher>();
             services.AddTransient<IEntityQueryable, EntityQueryableEfCore>();
             services.AddTransient<ISignaler<EntityBase>, SignalSystem<EntityBase>>();
+            services.AddTransient<IEntityProvider, EntityProvider>();
             services.AddDbContext<BaseEntityContext>(buildContext);
             services.AddScoped<DbContext, BaseEntityContext>(s =>
             {
