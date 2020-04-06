@@ -10,6 +10,6 @@ namespace Randomous.EntitySystem
         void AddValues(EntityPackage package, params EntityValue[] values);
         void AddRelations(EntityPackage package, params EntityRelation[] relations);
 
-        Task<List<EntityPackage>> ExpandAsync(params Entity[] entities);
+        Task<List<EntityPackage>> ExpandAsync(IEntityQueryable queryable, params Entity[] entities);
     }
 }

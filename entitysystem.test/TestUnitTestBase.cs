@@ -8,7 +8,7 @@ namespace Randomous.EntitySystem.test
         [Fact]
         public void TestCreateService()
         {
-            var provider = CreateService<EntityProviderEfCore>();
+            var provider = CreateService<EntityProvider>();
             Assert.NotNull(provider);
         }
     }
