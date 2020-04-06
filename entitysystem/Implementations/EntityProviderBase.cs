@@ -33,10 +33,11 @@ namespace Randomous.EntitySystem.Implementations
         //Note: there's no constructor because I'm doing something squirrely with EntityProviderMemory
         protected EntityProviderBaseServices services;
 
-        protected abstract Task<List<E>> GetList<E>(IQueryable<E> query) where E : EntityBase;
-        protected abstract IQueryable<E> GetQueryable<E>() where E : EntityBase;
+        public abstract Task<List<E>> GetList<E>(IQueryable<E> query); // where E : EntityBase;
+        public abstract IQueryable<E> GetQueryable<E>() where E : EntityBase;
         public abstract Task WriteAsync<E>(params E[] entities) where E : EntityBase;
 
+        public IEntitySearcher Searcher {get => services.Searcher;}
         
         protected string EntityValueKey(EntityValue value) { return value.key; }
         protected string EntityRelationKey(EntityRelation relation) { return relation.type; }

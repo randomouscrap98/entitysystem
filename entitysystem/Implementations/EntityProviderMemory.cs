@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Randomous.EntitySystem.Implementations
 {
-    public class EntityProviderMemory : EntityProviderBase, IEntityProvider
+    public class EntityProviderMemory : EntityProviderBase, IEntityQueryable
     {
         public EntityProviderMemory(ILoggerFactory logFactory) 
         {
@@ -22,8 +22,8 @@ namespace Randomous.EntitySystem.Implementations
 
         public List<EntityBase> AllItems = new List<EntityBase>();
 
-        protected override IQueryable<E> GetQueryable<E>() => AllItems.Where(x => x is E).Select(x => (E)x).AsQueryable();
-        protected override Task<List<E>> GetList<E>(IQueryable<E> query) => Task.FromResult(query.ToList());
+        public override IQueryable<E> GetQueryable<E>() => AllItems.Where(x => x is E).Select(x => (E)x).AsQueryable();
+        public override Task<List<E>> GetList<E>(IQueryable<E> query) => Task.FromResult(query.ToList());
 
         public Task DeleteAsync<E>(params E[] items) where E : EntityBase
         {

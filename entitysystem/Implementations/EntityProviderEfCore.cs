@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Randomous.EntitySystem.Implementations
 {
-    public class EntityProviderEfCore : EntityProviderBase, IEntityProvider
+    public class EntityProviderEfCore : EntityProviderBase, IEntityQueryable
     {
         public DbContext context;
 
@@ -18,8 +18,8 @@ namespace Randomous.EntitySystem.Implementations
             this.context = context;
         }
 
-        protected override IQueryable<E> GetQueryable<E>() { return context.Set<E>(); }
-        protected override async Task<List<E>> GetList<E>(IQueryable<E> query) { return await query.ToListAsync(); }
+        public override IQueryable<E> GetQueryable<E>() { return context.Set<E>(); }
+        public override async Task<List<E>> GetList<E>(IQueryable<E> query) { return await query.ToListAsync(); }
 
         public async Task DeleteAsync<E>(params E[] items) where E : EntityBase
         {
