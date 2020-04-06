@@ -12,16 +12,14 @@ namespace Randomous.EntitySystem.Implementations
         protected ISignaler<EntityBase> signaler;
         protected IEntityQueryable query;
         protected IEntitySearcher searcher;
-        //protected IEntityExpander expander;
 
 
         public EntityProvider(ILogger<EntityProvider> logger, IEntityQueryable query,
-            IEntitySearcher searcher, /*IEntityExpander expander,*/ ISignaler<EntityBase> signaler)
+            IEntitySearcher searcher, ISignaler<EntityBase> signaler)
         {
             this.logger = logger;
             this.query = query;
             this.searcher = searcher;
-            //this.expander = expander;
             this.signaler = signaler;
         }
 
@@ -41,10 +39,6 @@ namespace Randomous.EntitySystem.Implementations
             return searcher.ApplyGeneric<T>(query, search);
         }
 
-        public Task DeleteAsync<E>(params E[] items) where E : EntityBase {
-            return query.DeleteAsync(items);
-        }
-
         public Task<List<E>> GetAll<E>() where E : EntityBase {
             return query.GetAll<E>();
         }
@@ -61,6 +55,12 @@ namespace Randomous.EntitySystem.Implementations
         {
             await query.WriteAsync(entities);
             signaler.SignalItems(entities);
+        }
+
+        public async Task DeleteAsync<E>(params E[] items) where E : EntityBase 
+        {
+            await query.DeleteAsync(items);
+            signaler.SignalItems(items);
         }
 
         public async Task<List<Entity>> GetEntitiesAsync(EntitySearch search)

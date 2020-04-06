@@ -24,7 +24,6 @@ namespace Randomous.EntitySystem.Implementations
         {
             logger.LogTrace($"DeleteAsync called for {items.Count()} {typeof(E).Name} items");
             AllItems.RemoveAll(x => x is E && items.Any(y => y.id == x.id));
-            //FinalizeWrite(items);
             return Task.CompletedTask;
         }
 
@@ -48,7 +47,6 @@ namespace Randomous.EntitySystem.Implementations
                 AllItems.Add(item);
             }
 
-            //FinalizeWrite(items);
             return Task.CompletedTask;
         }
 

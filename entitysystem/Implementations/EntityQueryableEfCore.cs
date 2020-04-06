@@ -26,7 +26,6 @@ namespace Randomous.EntitySystem.Implementations
             logger.LogTrace($"DeleteAsync called for {items.Count()} {typeof(E).Name} items");
             context.RemoveRange(items);
             await context.SaveChangesAsync();
-            //FinalizeWrite(items);
         }
 
         public async Task WriteAsync<E>(params E[] items) where E : EntityBase
@@ -36,7 +35,6 @@ namespace Randomous.EntitySystem.Implementations
             logger.LogTrace($"WriteAsync called for {items.Count()} {typeof(E).Name} items");
             context.UpdateRange(items);
             await context.SaveChangesAsync();
-            //FinalizeWrite(items);
         }
     }
 }
