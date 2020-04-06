@@ -1,4 +1,69 @@
-//using System;
+using System;
+using System.Linq;
+using Randomous.EntitySystem.Implementations;
+using Xunit;
+
+namespace Randomous.EntitySystem.test
+{
+    public class TestEntityProvider : UnitTestBase
+    {
+        public EntityProvider provider; 
+
+        public TestEntityProvider()
+        {
+            provider = CreateService<EntityProvider>();
+        }
+
+        protected Entity NewEntity()
+        {
+            return new Entity()
+            {
+                createDate = DateTime.Now,
+                type = "Yeah",
+                name = "The ENtity",
+                content = "A lot of content comes from here!"
+            };
+        }
+
+        [Fact]
+        public void ListenTest()
+        {
+            //We're listening on empty
+            var task = provider.ListenNewAsync<Entity>(0, TimeSpan.FromMinutes(1));
+            AssertNotWait(task);
+
+            //Add a new entity. This should complete the above task.
+            var entity = NewEntity();
+            provider.WriteAsync(entity).Wait();
+
+            var result = AssertWait(task);
+            Assert.Single(result);
+            Assert.Equal(entity, result.First());
+        }
+
+        [Fact]
+        public virtual void ListenLaterTest()
+        {
+            var task = provider.ListenNewAsync<Entity>(5, TimeSpan.FromMinutes(1));
+            AssertNotWait(task);
+
+            for(var i = 0; i < 5; i++)
+            {
+                provider.WriteAsync(NewEntity()).Wait();
+                Assert.False(task.Wait(10)); //This might be bad...? Some "assert true" tests failed after even 200ms of waiting, so these could be incorrectly false
+                Assert.False(task.IsCompleted);
+            }
+
+            var entity = NewEntity();
+            provider.WriteAsync(entity).Wait();
+
+            var result = AssertWait(task);
+            Assert.Single(result);
+            Assert.Equal(entity, result.First());
+        }
+    }
+}
+
 //using System.Collections.Generic;
 //using System.Linq;
 //using Randomous.EntitySystem.Implementations;
@@ -61,36 +126,6 @@
 //            return package;
 //        }
 //
-//        [Fact]
-//        public void SimpleProviderWriteTest()
-//        {
-//            //Can we insert objects and get them out?
-//            provider.WriteAsync(NewEntity()).Wait();
-//        }
-//
-//        [Fact]
-//        public void SimpleProviderReadTest()
-//        {
-//            //Can we insert objects and get them out?
-//            var entity = NewEntity();
-//            provider.WriteAsync(entity).Wait();
-//            var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
-//            Assert.Equal(entity, entities.First());
-//            //NOTE: this also assumes entity id is written!
-//        }
-//
-//        [Fact]
-//        public void SimpleProviderUpdateTest()
-//        {
-//            var entity = NewEntity();
-//            provider.WriteAsync(entity).Wait();
-//            entity.type = "NONEOFYOURBUSINESS";
-//            provider.WriteAsync(entity).Wait(); //This SHOULD be just an update
-//            var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
-//            Assert.Single(entities);
-//            Assert.Equal(entity, entities.First()); //assume this works correctly (is it safe to assume?)
-//        }
-//
 //        //WARN: CAN'T TRACK SAME THING FROM MULTIPLE PLACES!!! How will
 //        //multithreading work?? 
 //
@@ -108,39 +143,6 @@
 //        //    Assert.Equal(newEntity, entities.First()); //assume this works correctly (is it safe to assume?)
 //        //    //Assert.Equal(entities.First().createDate)
 //        //}
-//
-//        [Fact]
-//        public void ProviderMultiWriteTest()
-//        {
-//            //Can we insert objects and get them out?
-//            for(var i = 0; i < 10; i++)
-//                provider.WriteAsync(NewEntity()).Wait();
-//
-//            var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
-//            Assert.Equal(10, entities.Count);
-//
-//            //Now try to insert them in a batch
-//            var writeEntries = new List<Entity>();
-//
-//            for(var i = 0; i < 10; i++)
-//                writeEntries.Add(NewEntity());
-//
-//            provider.WriteAsync(writeEntries.ToArray()).Wait();
-//            entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
-//            Assert.Equal(20, entities.Count);
-//        }
-//
-//        [Fact]
-//        public void SimpleProviderDeleteTest()
-//        {
-//            var entity = NewEntity();
-//            provider.WriteAsync(entity).Wait();
-//            var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
-//            Assert.Equal(entity, entities.First());
-//            provider.DeleteAsync(entity).Wait();
-//            entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
-//            Assert.Empty(entities);
-//        }
 //
 //        [Fact]
 //        public void ListenTest()

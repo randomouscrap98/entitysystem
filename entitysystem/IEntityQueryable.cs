@@ -24,7 +24,7 @@ namespace Randomous.EntitySystem
         /// </summary>
         /// <typeparam name="E"></typeparam>
         /// <returns></returns>
-        Task<List<E>> GetAll<E>() where E : EntityBase;
+        Task<List<E>> GetAllAsync<E>() where E : EntityBase;
 
         /// <summary>
         /// The base queryable for all E, run your queries against this

@@ -39,8 +39,8 @@ namespace Randomous.EntitySystem.Implementations
             return searcher.ApplyGeneric<T>(query, search);
         }
 
-        public Task<List<E>> GetAll<E>() where E : EntityBase {
-            return query.GetAll<E>();
+        public Task<List<E>> GetAllAsync<E>() where E : EntityBase {
+            return query.GetAllAsync<E>();
         }
 
         public Task<List<E>> GetList<E>(IQueryable<E> query) {
