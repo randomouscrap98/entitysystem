@@ -56,8 +56,8 @@
 //            var package = new EntityPackage() { Entity = NewEntity()};
 //            var value = NewValue();
 //            var relation = NewRelation();
-//            provider.Expand.AddValues(package, value);
-//            provider.Expand.AddRelations(package, relation);
+//            provider.AddValues(package, value);
+//            provider.AddRelations(package, relation);
 //            return package;
 //        }
 //
@@ -65,7 +65,7 @@
 //        public void SimpleProviderWriteTest()
 //        {
 //            //Can we insert objects and get them out?
-//            provider.Query.WriteAsync(NewEntity()).Wait();
+//            provider.WriteAsync(NewEntity()).Wait();
 //        }
 //
 //        [Fact]
@@ -73,8 +73,8 @@
 //        {
 //            //Can we insert objects and get them out?
 //            var entity = NewEntity();
-//            provider.Query.WriteAsync(entity).Wait();
-//            var entities = provider.Search.GetEntitiesAsync(new EntitySearch() {}).Result;
+//            provider.WriteAsync(entity).Wait();
+//            var entities = provider.GetEntitiesAsync(new EntitySearch() {}).Result;
 //            Assert.Equal(entity, entities.First());
 //            //NOTE: this also assumes entity id is written!
 //        }
@@ -179,87 +179,87 @@
 //            Assert.Equal(entity, result.First());
 //        }
 //
-//        [Fact]
-//        public virtual void SingleEntityPackageWrite()
-//        {
-//            //See if you can even write a SINGLE entity within a package
-//            provider.WriteAsync(new EntityPackage() { Entity = NewEntity()}).Wait();
-//        }
+//        //[Fact]
+//        //public virtual void SingleEntityPackageWrite()
+//        //{
+//        //    //See if you can even write a SINGLE entity within a package
+//        //    provider.WriteAsync(new EntityPackage() { Entity = NewEntity()}).Wait();
+//        //}
 //
-//        [Fact]
-//        public virtual void SimpleEntityPackageWrite()
-//        {
-//            //This creates a package with 1 value and 1 relation
-//            var package = NewPackage();
-//            provider.WriteAsync(package).Wait();
-//        }
+//        //[Fact]
+//        //public virtual void SimpleEntityPackageWrite()
+//        //{
+//        //    //This creates a package with 1 value and 1 relation
+//        //    var package = NewPackage();
+//        //    provider.WriteAsync(package).Wait();
+//        //}
 //
-//        [Fact]
-//        public virtual void SimpleEntityPackageRead()
-//        {
-//            //This creates a package with 1 value and 1 relation
-//            var package = NewPackage();
-//            provider.WriteAsync(package).Wait();
-//            Assert.True(package.Entity.id > 0);
+//        //[Fact]
+//        //public virtual void SimpleEntityPackageRead()
+//        //{
+//        //    //This creates a package with 1 value and 1 relation
+//        //    var package = NewPackage();
+//        //    provider.WriteAsync(package).Wait();
+//        //    Assert.True(package.Entity.id > 0);
 //
-//            var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
-//            Assert.Single(result);
-//            Assert.Equal(package.Entity, result.First());
-//        }
+//        //    var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
+//        //    Assert.Single(result);
+//        //    Assert.Equal(package.Entity, result.First());
+//        //}
 //
-//        [Fact]
-//        public virtual void SimpleEntityPackageExpand()
-//        {
-//            //This creates a package with 1 value and 1 relation
-//            var package = NewPackage();
-//            provider.WriteAsync(package).Wait();
-//            Assert.True(package.Entity.id > 0);
+//        //[Fact]
+//        //public virtual void SimpleEntityPackageExpand()
+//        //{
+//        //    //This creates a package with 1 value and 1 relation
+//        //    var package = NewPackage();
+//        //    provider.WriteAsync(package).Wait();
+//        //    Assert.True(package.Entity.id > 0);
 //
-//            var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
-//            Assert.Single(result);
-//            Assert.Equal(package.Entity, result.First());
+//        //    var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
+//        //    Assert.Single(result);
+//        //    Assert.Equal(package.Entity, result.First());
 //
-//            var expanded = provider.ExpandAsync(result.First()).Result;
-//            Assert.Single(expanded);
-//            Assert.Equal(package, expanded.First());
-//        }
+//        //    var expanded = provider.ExpandAsync(result.First()).Result;
+//        //    Assert.Single(expanded);
+//        //    Assert.Equal(package, expanded.First());
+//        //}
 //
-//        [Fact]
-//        public virtual void EntityPackageExpandRewrite()
-//        {
-//            //This creates a package with 1 value and 1 relation
-//            var package = NewPackage();
-//            provider.WriteAsync(package).Wait();
+//        //[Fact]
+//        //public virtual void EntityPackageExpandRewrite()
+//        //{
+//        //    //This creates a package with 1 value and 1 relation
+//        //    var package = NewPackage();
+//        //    provider.WriteAsync(package).Wait();
 //
-//            var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
-//            var expanded = provider.ExpandAsync(result.First()).Result.First();
-//            expanded.Values.First().Value.First().value = "lolButts";
-//            provider.WriteAsync(expanded).Wait();
+//        //    var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
+//        //    var expanded = provider.ExpandAsync(result.First()).Result.First();
+//        //    expanded.Values.First().Value.First().value = "lolButts";
+//        //    provider.WriteAsync(expanded).Wait();
 //
-//            result = provider.GetEntitiesAsync(new EntitySearch()).Result;
-//            var expanded2 = provider.ExpandAsync(result.First()).Result;
-//            Assert.Single(expanded2);
-//            Assert.Equal(expanded, expanded2.First());
-//        }
+//        //    result = provider.GetEntitiesAsync(new EntitySearch()).Result;
+//        //    var expanded2 = provider.ExpandAsync(result.First()).Result;
+//        //    Assert.Single(expanded2);
+//        //    Assert.Equal(expanded, expanded2.First());
+//        //}
 //
-//        [Fact]
-//        public virtual void EntityPackageBiggerExpand()
-//        {
-//            //This creates a package with 1 value and 1 relation
-//            var package = NewPackage();
-//            provider.AddValues(package, NewValue(), NewValue(), NewValue());
-//            provider.AddRelations(package, NewRelation(), NewRelation(), NewRelation());
-//            provider.WriteAsync(package).Wait();
-//            Assert.True(package.Entity.id > 0);
+//        //[Fact]
+//        //public virtual void EntityPackageBiggerExpand()
+//        //{
+//        //    //This creates a package with 1 value and 1 relation
+//        //    var package = NewPackage();
+//        //    provider.AddValues(package, NewValue(), NewValue(), NewValue());
+//        //    provider.AddRelations(package, NewRelation(), NewRelation(), NewRelation());
+//        //    provider.WriteAsync(package).Wait();
+//        //    Assert.True(package.Entity.id > 0);
 //
-//            var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
-//            Assert.Single(result);
-//            Assert.Equal(package.Entity, result.First());
+//        //    var result = provider.GetEntitiesAsync(new EntitySearch()).Result;
+//        //    Assert.Single(result);
+//        //    Assert.Equal(package.Entity, result.First());
 //
-//            var expanded = provider.ExpandAsync(result.First()).Result;
-//            Assert.Single(expanded);
-//            Assert.Equal(package, expanded.First());
-//        }
+//        //    var expanded = provider.ExpandAsync(result.First()).Result;
+//        //    Assert.Single(expanded);
+//        //    Assert.Equal(package, expanded.First());
+//        //}
 //    }
 //
 //    public class TestEntityProviderEfCore : BaseTestEntityProvider
