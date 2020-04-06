@@ -19,6 +19,7 @@ namespace Randomous.EntitySystem.Implementations
 
         public IQueryable<E> GetQueryable<E>() where E : EntityBase { return context.Set<E>(); } 
         public async Task<List<E>> GetList<E>(IQueryable<E> query) { return await query.ToListAsync(); }
+        public async Task<List<E>> GetAll<E>() where E : EntityBase { return await GetList(GetQueryable<E>()); }
 
         public async Task DeleteAsync<E>(params E[] items) where E : EntityBase
         {
