@@ -28,5 +28,13 @@ namespace Randomous.EntitySystem
         { 
             return id.GetHashCode(); 
         }
+
+        public EntityBase() {}
+
+        public EntityBase(EntityBase copy)
+        {
+            id = copy.id;
+            createDate = copy.createDate;
+        }
     }
 }

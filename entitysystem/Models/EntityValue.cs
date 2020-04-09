@@ -14,5 +14,14 @@ namespace Randomous.EntitySystem
             var other = (EntityValue)obj;
             return base.EqualsSelf(other) && entityId == other.entityId && key == other.key && value == other.value;
         }
+
+        public EntityValue() {}
+        
+        public EntityValue(EntityValue copy) : base(copy)
+        {
+            entityId = copy.entityId;
+            key = copy.key;
+            value = copy.value;
+        }
     }
 }

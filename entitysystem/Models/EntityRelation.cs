@@ -16,5 +16,15 @@ namespace Randomous.EntitySystem
             return base.EqualsSelf(other) && entityId1 == other.entityId1 && entityId2 == other.entityId2 && 
                     type == other.type && value == other.value;
         }
+
+        public EntityRelation() {}
+
+        public EntityRelation(EntityRelation copy) : base(copy)
+        {
+            entityId1 = copy.entityId1;
+            entityId2 = copy.entityId2;
+            type = copy.type;
+            value = copy.value;
+        }
     }
 }
