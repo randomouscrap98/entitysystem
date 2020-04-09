@@ -18,23 +18,23 @@ namespace Randomous.EntitySystem.Implementations
         }
 
         public IQueryable<E> GetQueryable<E>() where E : EntityBase { return context.Set<E>(); } 
-        public async Task<List<E>> GetList<E>(IQueryable<E> query) { return await query.ToListAsync(); }
-        public async Task<List<E>> GetAllAsync<E>() where E : EntityBase { return await GetList(GetQueryable<E>()); }
+        public Task<List<E>> GetListAsync<E>(IQueryable<E> query) { return query.ToListAsync(); }
+        public Task<List<E>> GetAllAsync<E>() where E : EntityBase { return GetListAsync(GetQueryable<E>()); }
 
-        public async Task DeleteAsync<E>(params E[] items) where E : EntityBase
+        public Task DeleteAsync<E>(params E[] items) where E : EntityBase
         {
             logger.LogTrace($"DeleteAsync called for {items.Count()} {typeof(E).Name} items");
             context.RemoveRange(items);
-            await context.SaveChangesAsync();
+            return context.SaveChangesAsync();
         }
 
-        public async Task WriteAsync<E>(params E[] items) where E : EntityBase
+        public Task WriteAsync<E>(params E[] items) where E : EntityBase
         {
             //Yes, we let efcore do all the work. if something weird happens... oh well. this class
             //isn't meant for safety... I think?
             logger.LogTrace($"WriteAsync called for {items.Count()} {typeof(E).Name} items");
             context.UpdateRange(items);
-            await context.SaveChangesAsync();
+            return context.SaveChangesAsync();
         }
     }
 }

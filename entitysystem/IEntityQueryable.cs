@@ -17,7 +17,7 @@ namespace Randomous.EntitySystem
         /// <param name="query"></param>
         /// <typeparam name="E"></typeparam>
         /// <returns></returns>
-        Task<List<E>> GetList<E>(IQueryable<E> query);
+        Task<List<E>> GetListAsync<E>(IQueryable<E> query);
 
         /// <summary>
         /// Quick shortcut to get all of type E

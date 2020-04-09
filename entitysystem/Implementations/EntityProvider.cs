@@ -43,8 +43,8 @@ namespace Randomous.EntitySystem.Implementations
             return query.GetAllAsync<E>();
         }
 
-        public Task<List<E>> GetList<E>(IQueryable<E> query) {
-            return this.query.GetList<E>(query);
+        public Task<List<E>> GetListAsync<E>(IQueryable<E> query) {
+            return this.query.GetListAsync<E>(query);
         }
 
         public IQueryable<E> GetQueryable<E>() where E : EntityBase {
@@ -63,22 +63,22 @@ namespace Randomous.EntitySystem.Implementations
             signaler.SignalItems(items);
         }
 
-        public async Task<List<Entity>> GetEntitiesAsync(EntitySearch search)
+        public Task<List<Entity>> GetEntitiesAsync(EntitySearch search)
         {
             logger.LogTrace("GetEntitiesAsync called");
-            return await query.GetList(searcher.ApplyEntitySearch(query.GetQueryable<Entity>(), search));
+            return query.GetListAsync(searcher.ApplyEntitySearch(query.GetQueryable<Entity>(), search));
         }
 
-        public async Task<List<EntityRelation>> GetEntityRelationsAsync(EntityRelationSearch search)
+        public Task<List<EntityRelation>> GetEntityRelationsAsync(EntityRelationSearch search)
         {
             logger.LogTrace("GetEntityRelationsAsync called");
-            return await query.GetList(searcher.ApplyEntityRelationSearch(query.GetQueryable<EntityRelation>(), search));
+            return query.GetListAsync(searcher.ApplyEntityRelationSearch(query.GetQueryable<EntityRelation>(), search));
         }
 
-        public async Task<List<EntityValue>> GetEntityValuesAsync(EntityValueSearch search)
+        public Task<List<EntityValue>> GetEntityValuesAsync(EntityValueSearch search)
         {
             logger.LogTrace("GetEntityValuesAsync called");
-            return await query.GetList(searcher.ApplyEntityValueSearch(query.GetQueryable<EntityValue>(), search));
+            return query.GetListAsync(searcher.ApplyEntityValueSearch(query.GetQueryable<EntityValue>(), search));
         }
 
         public async Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<E, bool> filter = null) where E : EntityBase
@@ -86,7 +86,7 @@ namespace Randomous.EntitySystem.Implementations
             logger.LogTrace($"ListenNewAsync called for lastId {lastId}, maxWait {maxWait}");
             filter = filter ?? new Func<E, bool>((x) => true);
 
-            var results = await query.GetList(query.GetQueryable<E>().Where(x => x.id > lastId).Select(x => (E)x));
+            var results = await query.GetListAsync(query.GetQueryable<E>().Where(x => x.id > lastId).Select(x => (E)x));
             results = results.Where(x => filter(x)).ToList(); //Maybe find a more elegant way to do this?
 
             if(results.Count > 0)
