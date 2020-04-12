@@ -78,6 +78,20 @@ namespace Randomous.EntitySystem.test
             entities = queryable.GetAllAsync<Entity>().Result;
             Assert.Empty(entities);
         }
+
+        public virtual void NonTrackedUpdateTest()
+        {
+            var entity = NewEntity();
+            queryable.WriteAsync<Entity>(new[] {entity}).Wait();
+            var newEntity = NewEntity();
+            newEntity.id = entity.id;
+            newEntity.type = "NONEOFYOURBUSINESS";
+            queryable.WriteAsync<Entity>(new[] {newEntity}).Wait(); //This SHOULD be just an update
+            var entities = queryable.GetAllAsync<Entity>().Result;
+            Assert.Single(entities);
+            Assert.Equal(newEntity, entities.First()); //assume this works correctly (is it safe to assume?)
+            //Assert.Equal(entities.First().createDate)
+        }
     }
 
     public class TestEntityQueryableEfCore : TestEntityQueryableBase
@@ -92,6 +106,7 @@ namespace Randomous.EntitySystem.test
         [Fact] public override void SimpleWriteTest() { base.SimpleWriteTest(); }
         [Fact] public override void SimpleDeleteTest() { base.SimpleDeleteTest(); }
         [Fact] public override void MultiWriteTest() { base.MultiWriteTest(); }
+        [Fact]public override void NonTrackedUpdateTest() { base.NonTrackedUpdateTest(); }
     }
 
     public class TestEntityQueryableMemory: TestEntityQueryableBase
@@ -106,5 +121,6 @@ namespace Randomous.EntitySystem.test
         [Fact] public override void SimpleWriteTest() { base.SimpleWriteTest(); }
         [Fact] public override void SimpleDeleteTest() { base.SimpleDeleteTest(); }
         [Fact] public override void MultiWriteTest() { base.MultiWriteTest(); }
+        [Fact]public override void NonTrackedUpdateTest() { base.NonTrackedUpdateTest(); }
     }
 }

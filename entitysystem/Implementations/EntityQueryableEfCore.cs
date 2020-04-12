@@ -14,6 +14,7 @@ namespace Randomous.EntitySystem.Implementations
         public EntityQueryableEfCore(ILogger<EntityQueryableEfCore> logger, DbContext context)
         {
             this.context = context;
+            //this.context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
             this.logger = logger;
         }
 
@@ -32,13 +33,24 @@ namespace Randomous.EntitySystem.Implementations
             return context.SaveChangesAsync();
         }
 
-        public Task WriteAsync<E>(params E[] items) where E : EntityBase
+        public async Task WriteAsync<E>(params E[] items) where E : EntityBase
         {
             //Yes, we let efcore do all the work. if something weird happens... oh well. this class
             //isn't meant for safety... I think?
             logger.LogTrace($"WriteAsync called for {items.Count()} {typeof(E).Name} items");
             context.UpdateRange(items);
-            return context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+
+            var entries = context.ChangeTracker.Entries()
+                .Where(e => e.State != EntityState.Detached)
+                .ToList();
+
+            foreach (var entry in entries)
+                if (entry.Entity != null)
+                    entry.State = EntityState.Detached;
+            //Still being tracked???
+            //for(var eb in items)
+            //    eb.
         }
     }
 }
