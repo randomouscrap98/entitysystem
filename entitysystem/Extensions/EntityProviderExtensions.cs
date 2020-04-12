@@ -60,21 +60,34 @@ namespace Randomous.EntitySystem.Extensions
         {
             //Logger?.LogTrace("LinkAsync called on entity queryable");
 
-            var bigGroup = from e in queryable
-                           join v in provider.GetQueryable<EntityValue>() on e.id equals v.entityId into evs
-                           from v in evs.DefaultIfEmpty()
-                           join r in provider.GetQueryable<EntityRelation>() on e.id equals r.entityId2 into evrs
-                           from r in evrs.DefaultIfEmpty()
-                           select new { Entity = e, Value = v, Relation = r};
-            
-            var grouping = (await provider.GetListAsync(bigGroup)).ToLookup(x => x.Entity.id);
+            //Performance test this sometime
+            var entities = await provider.GetListAsync(queryable);
+            var ids = entities.Select(x => x.id).ToList();
+            var values = await provider.GetEntityValuesAsync(new EntityValueSearch() { EntityIds = ids }); //Will this stuff be safe?
+            var relations = await provider.GetEntityRelationsAsync(new EntityRelationSearch() { EntityIds2 = ids }); //Will this stuff be safe?
 
-            return grouping.Select(x => new EntityPackage()
+            return entities.Select(x => new EntityPackage()
             {
-                Entity = x.First().Entity,
-                Values = x.Select(y => y.Value).ToList(),
-                Relations = x.Select(y => y.Relation).ToList()
+                Entity = x,
+                Values = values.Where(y => y.entityId == x.id).ToList(),
+                Relations = relations.Where(y => y.entityId2 == x.id).ToList()
             }).ToList();
+
+            //var bigGroup = from e in queryable
+            //               join v in provider.GetQueryable<EntityValue>() on e.id equals v.entityId into evs
+            //               from v in evs.DefaultIfEmpty()
+            //               join r in provider.GetQueryable<EntityRelation>() on e.id equals r.entityId2 into evrs
+            //               from r in evrs.DefaultIfEmpty()
+            //               select new { Entity = e, Value = v, Relation = r};
+            
+            //var grouping = (await provider.GetListAsync(bigGroup)).ToLookup(x => x.Entity.id);
+
+            //return grouping.Select(x => new EntityPackage()
+            //{
+            //    Entity = x.First().Entity,
+            //    Values = x.Select(y => y.Value).ToList(),
+            //    Relations = x.Select(y => y.Relation).ToList()
+            //}).ToList();
         }
 
         /// <summary>
