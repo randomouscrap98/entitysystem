@@ -17,7 +17,11 @@ namespace Randomous.EntitySystem.Implementations
             this.logger = logger;
         }
 
-        public IQueryable<E> GetQueryable<E>() where E : EntityBase { return context.Set<E>(); } 
+        public IQueryable<E> GetQueryable<E>() where E : EntityBase 
+        { 
+            return context.Set<E>().AsNoTracking(); 
+        }
+
         public Task<List<E>> GetListAsync<E>(IQueryable<E> query) { return query.ToListAsync(); }
         public Task<List<E>> GetAllAsync<E>() where E : EntityBase { return GetListAsync(GetQueryable<E>()); }
 

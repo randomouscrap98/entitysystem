@@ -17,7 +17,8 @@ namespace Randomous.EntitySystem
                     type == other.type && value == other.value;
         }
 
-        public EntityRelation() {}
+        public EntityRelation() : base() {}
+        public EntityRelation(bool createNow) : base(createNow) {}
 
         public EntityRelation(EntityRelation copy) : base(copy)
         {

@@ -29,7 +29,13 @@ namespace Randomous.EntitySystem
             return id.GetHashCode(); 
         }
 
-        public EntityBase() {}
+        public EntityBase() : this(true) {}
+
+        public EntityBase(bool createNow) 
+        {
+            if(createNow)
+                createDate = DateTime.Now;
+        }
 
         public EntityBase(EntityBase copy)
         {

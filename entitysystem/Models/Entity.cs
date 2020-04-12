@@ -16,6 +16,7 @@ namespace Randomous.EntitySystem
         }
 
         public Entity() {}
+        public Entity(bool createNow) : base(createNow) {}
 
         public Entity(Entity copy) : base(copy)
         {

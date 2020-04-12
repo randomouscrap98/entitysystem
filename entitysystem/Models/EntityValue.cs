@@ -15,7 +15,8 @@ namespace Randomous.EntitySystem
             return base.EqualsSelf(other) && entityId == other.entityId && key == other.key && value == other.value;
         }
 
-        public EntityValue() {}
+        public EntityValue() : base() {}
+        public EntityValue(bool createNow) : base(createNow) {}
         
         public EntityValue(EntityValue copy) : base(copy)
         {
