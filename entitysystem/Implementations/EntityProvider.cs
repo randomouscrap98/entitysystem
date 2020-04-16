@@ -23,6 +23,11 @@ namespace Randomous.EntitySystem.Implementations
             this.signaler = signaler;
         }
 
+        public IQueryable<T> ApplyFinal<T>(IQueryable<T> query, EntitySearchBase search) where T : EntityBase
+        {
+            return searcher.ApplyFinal(query, search);
+        }
+
         public IQueryable<EntityRelation> ApplyEntityRelationSearch(IQueryable<EntityRelation> query, EntityRelationSearch search, bool finalize) {
             return searcher.ApplyEntityRelationSearch(query, search, finalize);
         }

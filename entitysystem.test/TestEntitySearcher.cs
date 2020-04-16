@@ -18,7 +18,7 @@ namespace Randomous.EntitySystem.test
     /// </remarks>
     public class TestEntitySearcher : UnitTestBase
     {
-        protected EntitySearcher searcher;
+        protected IEntitySearcher searcher;
 
         public TestEntitySearcher()
         {

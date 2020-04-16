@@ -28,7 +28,7 @@ namespace Randomous.EntitySystem.Implementations
         /// <param name="search"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public IQueryable<T> ApplyGeneric<T>(IQueryable<T> query, EntitySearchBase search, bool finalize = true) where T : EntityBase
+        public IQueryable<T> ApplyGeneric<T>(IQueryable<T> query, EntitySearchBase search, bool finalize) where T : EntityBase
         {
             if(search.Ids.Count > 0)
                 query = query.Where(x => search.Ids.Contains(x.id));
@@ -66,7 +66,7 @@ namespace Randomous.EntitySystem.Implementations
             return query;
         }
 
-        public IQueryable<Entity> ApplyEntitySearch(IQueryable<Entity> query, EntitySearch search, bool finalize = true)
+        public IQueryable<Entity> ApplyEntitySearch(IQueryable<Entity> query, EntitySearch search, bool finalize)
         {
             query = ApplyGeneric(query, search, false);
             
@@ -82,7 +82,7 @@ namespace Randomous.EntitySystem.Implementations
             return query;
         }
 
-        public IQueryable<EntityValue> ApplyEntityValueSearch(IQueryable<EntityValue> query, EntityValueSearch search, bool finalize = true)
+        public IQueryable<EntityValue> ApplyEntityValueSearch(IQueryable<EntityValue> query, EntityValueSearch search, bool finalize)
         {
             query = ApplyGeneric(query, search, false);
 
@@ -101,7 +101,7 @@ namespace Randomous.EntitySystem.Implementations
             return query;
         }
 
-        public IQueryable<EntityRelation> ApplyEntityRelationSearch(IQueryable<EntityRelation> query, EntityRelationSearch search, bool finalize = true)
+        public IQueryable<EntityRelation> ApplyEntityRelationSearch(IQueryable<EntityRelation> query, EntityRelationSearch search, bool finalize)
         {
             query = ApplyGeneric<EntityRelation>(query, search, false);
 
