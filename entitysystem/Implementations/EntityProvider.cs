@@ -23,20 +23,20 @@ namespace Randomous.EntitySystem.Implementations
             this.signaler = signaler;
         }
 
-        public IQueryable<EntityRelation> ApplyEntityRelationSearch(IQueryable<EntityRelation> query, EntityRelationSearch search) {
-            return searcher.ApplyEntityRelationSearch(query, search);
+        public IQueryable<EntityRelation> ApplyEntityRelationSearch(IQueryable<EntityRelation> query, EntityRelationSearch search, bool finalize) {
+            return searcher.ApplyEntityRelationSearch(query, search, finalize);
         }
 
-        public IQueryable<Entity> ApplyEntitySearch(IQueryable<Entity> query, EntitySearch search) {
-            return searcher.ApplyEntitySearch(query, search);
+        public IQueryable<Entity> ApplyEntitySearch(IQueryable<Entity> query, EntitySearch search, bool finalize) {
+            return searcher.ApplyEntitySearch(query, search, finalize);
         }
 
-        public IQueryable<EntityValue> ApplyEntityValueSearch(IQueryable<EntityValue> query, EntityValueSearch search) {
-            return searcher.ApplyEntityValueSearch(query, search);
+        public IQueryable<EntityValue> ApplyEntityValueSearch(IQueryable<EntityValue> query, EntityValueSearch search, bool finalize) {
+            return searcher.ApplyEntityValueSearch(query, search, finalize);
         }
 
-        public IQueryable<T> ApplyGeneric<T>(IQueryable<T> query, EntitySearchBase search) where T : EntityBase {
-            return searcher.ApplyGeneric<T>(query, search);
+        public IQueryable<T> ApplyGeneric<T>(IQueryable<T> query, EntitySearchBase search, bool finalize) where T : EntityBase {
+            return searcher.ApplyGeneric<T>(query, search, finalize);
         }
 
         public Task<List<E>> GetAllAsync<E>() where E : EntityBase {

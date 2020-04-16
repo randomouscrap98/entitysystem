@@ -28,7 +28,7 @@ namespace Randomous.EntitySystem.Implementations
         /// <param name="search"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public IQueryable<T> ApplyGeneric<T>(IQueryable<T> query, EntitySearchBase search) where T : EntityBase
+        public IQueryable<T> ApplyGeneric<T>(IQueryable<T> query, EntitySearchBase search, bool finalize = true) where T : EntityBase
         {
             if(search.Ids.Count > 0)
                 query = query.Where(x => search.Ids.Contains(x.id));
@@ -37,6 +37,9 @@ namespace Randomous.EntitySystem.Implementations
                 query = query.Where(x => x.createDate <= search.CreateEnd);
             if(search.CreateStart.Ticks > 0)
                 query = query.Where(x => x.createDate >= search.CreateStart);
+
+            if(finalize)
+                query = ApplyFinal(query, search);
 
             return query;
         }
@@ -63,9 +66,9 @@ namespace Randomous.EntitySystem.Implementations
             return query;
         }
 
-        public IQueryable<Entity> ApplyEntitySearch(IQueryable<Entity> query, EntitySearch search)
+        public IQueryable<Entity> ApplyEntitySearch(IQueryable<Entity> query, EntitySearch search, bool finalize = true)
         {
-            query = ApplyGeneric(query, search);
+            query = ApplyGeneric(query, search, false);
             
             if(!string.IsNullOrEmpty(search.NameLike))
                 query = query.Where(x => EF.Functions.Like(x.name, search.NameLike));
@@ -73,12 +76,15 @@ namespace Randomous.EntitySystem.Implementations
             if(!string.IsNullOrEmpty(search.TypeLike))
                 query = query.Where(x => EF.Functions.Like(x.type, search.TypeLike));
 
-            return ApplyFinal(query, search);
+            if(finalize)
+                query = ApplyFinal(query, search);
+            
+            return query;
         }
 
-        public IQueryable<EntityValue> ApplyEntityValueSearch(IQueryable<EntityValue> query, EntityValueSearch search)
+        public IQueryable<EntityValue> ApplyEntityValueSearch(IQueryable<EntityValue> query, EntityValueSearch search, bool finalize = true)
         {
-            query = ApplyGeneric(query, search);
+            query = ApplyGeneric(query, search, false);
 
             if(!string.IsNullOrEmpty(search.KeyLike))
                 query = query.Where(x => EF.Functions.Like(x.key, search.KeyLike));
@@ -89,12 +95,15 @@ namespace Randomous.EntitySystem.Implementations
             if(search.EntityIds.Count > 0)
                 query = query.Where(x => search.EntityIds.Contains(x.entityId));
 
-            return ApplyFinal(query, search);
+            if(finalize)
+                query = ApplyFinal(query, search);
+
+            return query;
         }
 
-        public IQueryable<EntityRelation> ApplyEntityRelationSearch(IQueryable<EntityRelation> query, EntityRelationSearch search)
+        public IQueryable<EntityRelation> ApplyEntityRelationSearch(IQueryable<EntityRelation> query, EntityRelationSearch search, bool finalize = true)
         {
-            query = ApplyGeneric<EntityRelation>(query, search);
+            query = ApplyGeneric<EntityRelation>(query, search, false);
 
             if(!string.IsNullOrEmpty(search.TypeLike))
                 query = query.Where(x => EF.Functions.Like(x.type, search.TypeLike));
@@ -105,7 +114,10 @@ namespace Randomous.EntitySystem.Implementations
             if(search.EntityIds2.Count > 0)
                 query = query.Where(x => search.EntityIds2.Contains(x.entityId2));
 
-            return ApplyFinal(query, search);
+            if(finalize)
+                query = ApplyFinal(query, search);
+
+            return query;
         }
     }
 }

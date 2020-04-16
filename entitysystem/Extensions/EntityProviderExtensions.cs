@@ -62,6 +62,11 @@ namespace Randomous.EntitySystem.Extensions
 
             //Performance test this sometime
             var entities = await provider.GetListAsync(queryable);
+
+            //Oops, there's nothing. Don't bother (we don't need to query the WHOLE database for no entities)
+            if(entities.Count == 0)
+                return new List<EntityPackage>();
+
             var ids = entities.Select(x => x.id).ToList();
             var values = await provider.GetEntityValuesAsync(new EntityValueSearch() { EntityIds = ids }); //Will this stuff be safe?
             var relations = await provider.GetEntityRelationsAsync(new EntityRelationSearch() { EntityIds2 = ids }); //Will this stuff be safe?

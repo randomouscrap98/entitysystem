@@ -6,51 +6,15 @@ namespace Randomous.EntitySystem.Extensions
 {
     public static class EntityPackageExtensions
     {
-        ///// <summary>
-        ///// Get an easy preformated EntityRelation
-        ///// </summary>
-        ///// <param name="entity1"></param>
-        ///// <param name="entity2"></param>
-        ///// <param name="type"></param>
-        ///// <param name="value"></param>
-        ///// <returns></returns>
-        //public static EntityRelation QuickRelation(long entity1, long entity2, string type, string value = null)
-        //{
-        //    return new EntityRelation()
-        //    {
-        //        createDate = DateTime.Now,
-        //        entityId1 = entity1,
-        //        entityId2 = entity2,
-        //        type = type,
-        //        value = value
-        //    };
-        //}
-
-        ///// <summary>
-        ///// Get an easy preformated entity
-        ///// </summary>
-        ///// <param name="name"></param>
-        ///// <param name="content"></param>
-        ///// <returns></returns>
-        //public static EntityPackage QuickEntity(string name, string content = null)
-        //{
-        //    return new EntityPackage()
-        //    {
-        //        createDate = DateTime.Now,
-        //        name = name,
-        //        content = content
-        //    };
-        //}
-
-        public static EntityPackage Add(this EntityPackage entity, EntityValue value)//string key, string value)
+        public static EntityPackage Add(this EntityPackage entity, EntityValue value)
         {
-            entity.Values.Add(value); //QuickValue(key, value));
+            entity.Values.Add(value);
             return entity;
         }
 
-        public static EntityPackage Add(this EntityPackage entity, EntityRelation relation) //long entity1, string type, string value = null)
+        public static EntityPackage Add(this EntityPackage entity, EntityRelation relation)
         {
-            entity.Relations.Add(relation); //QuickRelation(entity1, entity.id, type, value));
+            entity.Relations.Add(relation);
             return entity;
         }
 
