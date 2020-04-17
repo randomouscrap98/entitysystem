@@ -86,18 +86,25 @@ namespace Randomous.EntitySystem.Implementations
             return query.GetListAsync(searcher.ApplyEntityValueSearch(query.GetQueryable<EntityValue>(), search));
         }
 
-        public async Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<E, bool> filter = null) where E : EntityBase
+        public async Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<IQueryable<E>, IQueryable<E>> filter = null) where E : EntityBase
         {
             logger.LogTrace($"ListenNewAsync called for lastId {lastId}, maxWait {maxWait}");
-            filter = filter ?? new Func<E, bool>((x) => true);
+            filter = filter ?? new Func<IQueryable<E>, IQueryable<E>>(x => x);
 
-            var results = await query.GetListAsync(query.GetQueryable<E>().Where(x => x.id > lastId).Select(x => (E)x));
-            results = results.Where(x => filter(x)).ToList(); //Maybe find a more elegant way to do this?
+            var results = await query.GetListAsync(filter(query.GetQueryable<E>().Where(x => x.id > lastId).Select(x => (E)x)));
 
             if(results.Count > 0)
+            {
                 return results;
+            }
             else
-                return (await signaler.ListenAsync((e) => e is E && e.id > lastId && filter((E)e), maxWait)).Cast<E>().ToList();
+            {
+                var bigFilter = new Func<IQueryable<EntityBase>, IQueryable<EntityBase>>(q =>
+                    filter(q.Where(e => e is E && e.id > lastId).Cast<E>())
+                );
+
+                return (await signaler.ListenAsync(bigFilter, maxWait)).Cast<E>().ToList();
+            }
         }
     }
 }

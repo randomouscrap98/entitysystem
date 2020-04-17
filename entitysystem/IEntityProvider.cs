@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Randomous.EntitySystem
@@ -41,6 +42,6 @@ namespace Randomous.EntitySystem
         /// <param name="filter"></param>
         /// <typeparam name="E"></typeparam>
         /// <returns></returns>
-        Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<E, bool> filter = null) where E : EntityBase;
+        Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<IQueryable<E>, IQueryable<E>> filter = null) where E : EntityBase;
     }
 }

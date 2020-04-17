@@ -12,7 +12,8 @@ namespace Randomous.EntitySystem.Implementations
         public DateTime CreateDate = DateTime.Now;
         public List<T> Signalers = new List<T>();
         //public bool Cancelled = false;
-        public Func<T, bool> Filter;
+        //public Func<T, bool> Filter;
+        public Func<IQueryable<T>, IQueryable<T>> Filter;
         public ManualResetEvent Signal = new ManualResetEvent(false);
 
         //I don't CARE if this is "not the right way to do dispose", the right way is GARBAGE and I am
@@ -41,6 +42,9 @@ namespace Randomous.EntitySystem.Implementations
 
             var result = items.ToDictionary(x => x, y => 0);
 
+            //Items don't change, so compute the queryable now so it doesn't happen for every listener
+            var itemsQueryable = items.AsQueryable();
+
             //Assuming saving actually works, let's go alert everyone
             lock(listenLock)
             {
@@ -50,7 +54,7 @@ namespace Randomous.EntitySystem.Implementations
                     try
                     {
                         //Find out which items would signal this listener
-                        var signalItems = items.Where(x => listener.Filter(x)).ToList();
+                        var signalItems = listener.Filter(itemsQueryable).ToList();
 
                         //Signal this listener if any did. Increase signal count for each item 
                         if(signalItems.Count > 0)
@@ -84,7 +88,12 @@ namespace Randomous.EntitySystem.Implementations
             return signaled;
         }
 
-        public async Task<List<T>> ListenAsync(Func<T, bool> filter, TimeSpan maxWait)
+        public Task<List<T>> ListenAsync(Func<T, bool> filter, TimeSpan maxWait)
+        {
+            return ListenAsync((q) => q.Where(x => filter(x)), maxWait);
+        }
+
+        public async Task<List<T>> ListenAsync(Func<IQueryable<T>, IQueryable<T>> filter, TimeSpan maxWait)
         {
             logger.LogTrace($"ListenAsync called with maxWait {maxWait}");
 
