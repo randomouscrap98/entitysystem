@@ -8,7 +8,7 @@ namespace Randomous.EntitySystem
     public class EntityBase
     {
         public long id {get;set;}
-        public DateTime? createDate {get;set;}
+        public DateTimeOffset? createDate {get;set;}
 
         protected virtual bool EqualsSelf(object obj)
         {
