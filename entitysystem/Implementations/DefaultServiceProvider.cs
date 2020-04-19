@@ -11,7 +11,7 @@ namespace Randomous.EntitySystem.Implementations
             services.AddSingleton(new GeneralHelper());
             services.AddTransient<IEntitySearcher, EntitySearcher>();
             services.AddTransient<IEntityQueryable, EntityQueryableEfCore>();
-            services.AddTransient<ISignaler<EntityBase>, SignalSystem<EntityBase>>();
+            services.AddTransient<ISignaler<EntityBase>, SignalSystem<EntityBase>>(); //you may think the signaler needs to be a singleton. Not always... people can add that themselves.
             services.AddTransient<IEntityProvider, EntityProvider>();
             services.AddDbContext<BaseEntityContext>(buildContext);
             services.AddScoped<DbContext, BaseEntityContext>(s =>

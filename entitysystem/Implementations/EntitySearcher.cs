@@ -38,6 +38,11 @@ namespace Randomous.EntitySystem.Implementations
             if(search.CreateStart.Ticks > 0)
                 query = query.Where(x => x.createDate >= search.CreateStart);
 
+            if(search.MaxId >= 0)
+                query = query.Where(x => x.id < search.MaxId);
+            if(search.MinId >= 0)
+                query = query.Where(x => x.id > search.MinId);
+
             if(finalize)
                 query = ApplyFinal(query, search);
 

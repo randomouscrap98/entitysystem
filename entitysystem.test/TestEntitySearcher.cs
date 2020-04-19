@@ -25,7 +25,7 @@ namespace Randomous.EntitySystem.test
             searcher = CreateService<EntitySearcher>();
         }
 
-        public IQueryable<E> BasicDataset<E>(int count = 100) where E : EntityBase, new()
+        public List<E> GenerateBaseData<E>(int count = 100) where E : EntityBase, new()
         {
             var entities = new List<E>();
 
@@ -50,7 +50,12 @@ namespace Randomous.EntitySystem.test
                 entities.Add(e);
             }
 
-            return entities.AsQueryable();
+            return entities;
+        }
+
+        public virtual IQueryable<E> BasicDataset<E>(int count = 100) where E : EntityBase, new()
+        {
+            return GenerateBaseData<E>().AsQueryable();
         }
 
         protected void SimpleEmptyTest<E,S>(Func<S, IQueryable<E>, IQueryable<E>> applySearch) where E : EntityBase, new() where S : EntitySearchBase, new()
@@ -260,5 +265,46 @@ namespace Randomous.EntitySystem.test
         [Fact]
         public void SearchEntityRelationSKipLimit() { 
             SimpleSkipLimitTest<EntityRelation, EntityRelationSearch>((s, e) => searcher.ApplyEntityRelationSearch(e, s)); }
+
+        protected void SimpleMaxMinTest<E,S>(Func<S, IQueryable<E>, IQueryable<E>> applySearch) where E : EntityBase, new() where S : EntitySearchBase, new()
+        {
+            var entities = BasicDataset<E>();
+            var search = new S();
+
+            search.MaxId = 20;//CreateStart = DateTime.Now.AddDays(-10);
+            var result = applySearch(search, entities);
+            Assert.True(result.All(x => x.id < 20));
+
+            search.MinId = 10;
+            result = applySearch(search, entities);
+            Assert.True(result.All(x => x.id < 20 && x.id > 10));
+        }
+
+        [Fact]
+        public void SearchBaseMaxMin() { SimpleMaxMinTest<EntityBase, EntitySearchBase>((s, e) => searcher.ApplyGeneric<EntityBase>(e, s)); }
+
+        [Fact]
+        public void SearchEntityMaxMin() { SimpleMaxMinTest<Entity, EntitySearch>((s, e) => searcher.ApplyEntitySearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityValueMaxMin() { SimpleMaxMinTest<EntityValue, EntityValueSearch>((s, e) => searcher.ApplyEntityValueSearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityRelationMaxMin() { SimpleMaxMinTest<EntityRelation, EntityRelationSearch>((s, e) => searcher.ApplyEntityRelationSearch(e, s)); }
     }
+
+    //public class TestEntitySearchLive : TestEntitySearcher
+    //{
+    //    protected List<IEntityProvider> providers = new List<IEntityProvider>();
+
+    //    public override IQueryable<E> BasicDataset<E>(int count = 100)
+    //    {
+    //        //Create some NEW provider EVERY TIME wow
+    //        var provider = CreateService<IEntityProvider>();
+    //        var entities = GenerateBaseData<E>(count);
+    //        provider.WriteAsync(entities.ToArray());
+    //        providers.Add(provider); //I don't know why I'm keeping track of this
+    //        return provider.GetQueryable<E>();
+    //    }
+    //}
 }

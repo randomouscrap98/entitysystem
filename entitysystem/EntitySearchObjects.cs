@@ -13,6 +13,17 @@ namespace Randomous.EntitySystem
         public List<long> Ids {get;set;} = new List<long>();
         public DateTime CreateStart {get;set;} = new DateTime(0);
         public DateTime CreateEnd {get;set;} = new DateTime(0);
+
+        /// <summary>
+        /// Only ids strictly lower 
+        /// </summary>
+        /// <value></value>
+        public long MaxId {get;set;} = -1;
+        /// <summary>
+        /// Only ids strictly higher
+        /// </summary>
+        /// <value></value>
+        public long MinId {get;set;} = -1;
         public int Limit {get;set;} = -1;
         public int Skip {get;set;} = -1;
         public bool Reverse {get;set;} = false;

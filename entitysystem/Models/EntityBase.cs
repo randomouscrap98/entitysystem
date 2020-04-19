@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Randomous.EntitySystem
 {
@@ -8,7 +9,24 @@ namespace Randomous.EntitySystem
     public class EntityBase
     {
         public long id {get;set;}
-        public DateTimeOffset? createDate {get;set;}
+
+        /// <summary>
+        /// WARN: "Kind" is lost on sqlite databases! When converting to views, consider setting the timezone/kind manually!
+        /// </summary>
+        /// <value></value>
+        public DateTime? createDate {get;set;}
+
+        /// <summary>
+        /// Get the createDate with "proper" kind set (assumes same system wrote the createDate as the one reading it!!)
+        /// </summary>
+        /// <returns></returns>
+        public DateTime? createDateProper()
+        {   
+            if(createDate == null)
+                return null;
+
+            return new DateTime(((DateTime)createDate).Ticks, DateTime.Now.Kind);
+        }
 
         protected virtual bool EqualsSelf(object obj)
         {

@@ -41,7 +41,12 @@ namespace Randomous.EntitySystem.test
             connections.Append(connection);
 
             var services = new ServiceCollection();
-            services.AddLogging(configure => configure.AddSerilog(new LoggerConfiguration().WriteTo.File($"{GetType()}.txt").CreateLogger()));
+            services.AddLogging(configure => 
+            {
+                configure.AddSerilog(new LoggerConfiguration().WriteTo.File($"{GetType()}.txt").CreateLogger());
+                configure.AddDebug();
+                //configure.SetMinimumLevel(LogLevel.Trace);
+            });
             serviceProvider.AddDefaultServices(
                 services, 
                 options => options.UseSqlite(connection).EnableSensitiveDataLogging(true),
