@@ -9,6 +9,7 @@ namespace Randomous.EntitySystem.Implementations
 {
     public class Listener<T> : IDisposable
     {
+        public object ListenerId;
         public DateTime CreateDate = DateTime.Now;
         public List<T> Signalers = new List<T>();
         //public bool Cancelled = false;
@@ -30,6 +31,25 @@ namespace Randomous.EntitySystem.Implementations
 
         protected readonly object listenLock = new object();
         protected List<Listener<T>> listeners = new List<Listener<T>>();
+
+        //protected readonly object listenerListenLock = new object();
+        //protected List<
+        //protected readonly ManualResetEvent listenerListenSignal = new ManualResetEvent(false);
+
+        public List<ListenerData> Listeners 
+        {
+            get
+            {
+                lock(listenLock)
+                {
+                    return listeners.Select(x => new ListenerData()
+                    {
+                        ListenerId = x.ListenerId,
+                        StartedListening = x.CreateDate
+                    }).ToList();
+                }
+            }
+        }
 
         public SignalSystem(ILogger<SignalSystem<T>> logger)
         {
@@ -88,21 +108,23 @@ namespace Randomous.EntitySystem.Implementations
             return signaled;
         }
 
-        public Task<List<T>> ListenAsync(Func<T, bool> filter, TimeSpan maxWait)
+        public Task<List<T>> ListenAsync(object listenId, Func<T, bool> filter, TimeSpan maxWait)
         {
-            return ListenAsync((q) => q.Where(x => filter(x)), maxWait);
+            return ListenAsync(listenId, (q) => q.Where(x => filter(x)), maxWait);
         }
 
-        public async Task<List<T>> ListenAsync(Func<IQueryable<T>, IQueryable<T>> filter, TimeSpan maxWait)
+        public async Task<List<T>> ListenAsync(object listenId, Func<IQueryable<T>, IQueryable<T>> filter, TimeSpan maxWait)
         {
-            logger.LogTrace($"ListenAsync called with maxWait {maxWait}");
+            logger.LogTrace($"ListenAsync called with id {listenId}, maxWait {maxWait}");
 
-            using(var listener = new Listener<T>())
+            using(var listener = new Listener<T>() { ListenerId = listenId })
             {
                 listener.Filter = filter;
 
                 lock(listenLock)
+                {
                     listeners.Add(listener);
+                }
 
                 try
                 {

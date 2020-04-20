@@ -37,7 +37,7 @@ namespace Randomous.EntitySystem.test
         public void ListenTest()
         {
             //We're listening on empty
-            var task = provider.ListenNewAsync<Entity>(0, TimeSpan.FromMinutes(1));
+            var task = provider.ListenAsync<Entity>(1, (q) => q.Where(e => e.id > 0), TimeSpan.FromMinutes(1));
             AssertNotWait(task);
 
             //Add a new entity. This should complete the above task.
@@ -52,7 +52,7 @@ namespace Randomous.EntitySystem.test
         [Fact]
         public virtual void ListenLaterTest()
         {
-            var task = provider.ListenNewAsync<Entity>(5, TimeSpan.FromMinutes(1));
+            var task = provider.ListenAsync<Entity>(1, (q) => q.Where(e => e.id > 5), TimeSpan.FromMinutes(1));
             AssertNotWait(task);
 
             for(var i = 0; i < 5; i++)

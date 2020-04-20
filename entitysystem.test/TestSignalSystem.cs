@@ -27,7 +27,7 @@ namespace Randomous.EntitySystem.test
 
         protected Task<List<int>> CreateSingleListen(int look, TimeSpan? listenTime = null)
         {
-            var task = signaler.ListenAsync((x) => x == look, listenTime ?? TimeSpan.FromMinutes(1));
+            var task = signaler.ListenAsync(look, (x) => x == look, listenTime ?? TimeSpan.FromMinutes(1));
             Assert.False(task.IsCompleted); //There should be no signals yet
             return task;
         }
@@ -64,7 +64,7 @@ namespace Randomous.EntitySystem.test
         [Fact]
         public void MultiSignal()
         {
-            var task = signaler.ListenAsync((e) => true, TimeSpan.FromMinutes(1));
+            var task = signaler.ListenAsync(1, (e) => true, TimeSpan.FromMinutes(1));
             var result = signaler.SignalItems(new[] {9,7});
             Assert.True(result.ContainsKey(9));
             Assert.Equal(1, result[9]);  //A single listener (us)
@@ -92,6 +92,20 @@ namespace Randomous.EntitySystem.test
             {
                 Assert.IsType<TimeoutException>(ex.InnerException);
             }
+        }
+
+        [Fact]
+        public void ListenersCheck()
+        {
+            var task9 = CreateSingleListen(9); 
+            var task7 = CreateSingleListen(7, TimeSpan.FromMilliseconds(100));
+            Assert.True(signaler.Listeners.Count == 2);
+            var result = signaler.SignalItems(new[] {9});
+            AssertListen(task9, new List<int>() {9});
+            Assert.Single(signaler.Listeners);
+            result = signaler.SignalItems(new[] {7});
+            AssertListen(task7, new List<int>() {7});
+            Assert.Empty(signaler.Listeners);
         }
     }
 }

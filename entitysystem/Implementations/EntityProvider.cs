@@ -86,12 +86,11 @@ namespace Randomous.EntitySystem.Implementations
             return query.GetListAsync(searcher.ApplyEntityValueSearch(query.GetQueryable<EntityValue>(), search));
         }
 
-        public async Task<List<E>> ListenNewAsync<E>(long lastId, TimeSpan maxWait, Func<IQueryable<E>, IQueryable<E>> filter = null) where E : EntityBase
+        public async Task<List<E>> ListenAsync<E>(object listenId, Func<IQueryable<E>, IQueryable<E>> filter, TimeSpan maxWait) where E : EntityBase
         {
-            logger.LogTrace($"ListenNewAsync called for lastId {lastId}, maxWait {maxWait}");
-            filter = filter ?? new Func<IQueryable<E>, IQueryable<E>>(x => x);
+            logger.LogTrace($"ListenNewAsync called for maxWait {maxWait}");
 
-            var results = await query.GetListAsync(filter(query.GetQueryable<E>().Where(x => x.id > lastId).Select(x => (E)x)));
+            var results = await query.GetListAsync(filter(query.GetQueryable<E>().Select(x => (E)x)));
 
             if(results.Count > 0)
             {
@@ -100,11 +99,13 @@ namespace Randomous.EntitySystem.Implementations
             else
             {
                 var bigFilter = new Func<IQueryable<EntityBase>, IQueryable<EntityBase>>(q =>
-                    filter(q.Where(e => e is E && e.id > lastId).Cast<E>())
+                    filter(q.Where(e => e is E).Cast<E>())
                 );
 
-                return (await signaler.ListenAsync(bigFilter, maxWait)).Cast<E>().ToList();
+                return (await signaler.ListenAsync(listenId, bigFilter, maxWait)).Cast<E>().ToList();
             }
         }
+
+        public List<ListenerData> Listeners => signaler.Listeners;
     }
 }
