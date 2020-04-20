@@ -43,14 +43,18 @@ namespace Randomous.EntitySystem.test
             var services = new ServiceCollection();
             services.AddLogging(configure => 
             {
-                configure.AddSerilog(new LoggerConfiguration().WriteTo.File($"{GetType()}.txt").CreateLogger());
+                var seriConfig = new LoggerConfiguration().WriteTo.File($"{GetType()}.txt");
+                seriConfig.MinimumLevel.Verbose();
+                configure.AddSerilog(seriConfig.CreateLogger());
                 configure.AddDebug();
+                configure.SetMinimumLevel(LogLevel.Trace);
+                //configure.
                 //configure.SetMinimumLevel(LogLevel.Trace);
             });
             serviceProvider.AddDefaultServices(
                 services, 
                 options => options.UseSqlite(connection).EnableSensitiveDataLogging(true),
-                d => d.Database.EnsureCreated());
+                    d => d.Database.EnsureCreated());
 
             return services;
         }
@@ -78,6 +82,19 @@ namespace Randomous.EntitySystem.test
         {
             Assert.Equal(expected.Count(), result.Count());
             Assert.Equal(expected.ToHashSet(), result.ToHashSet());
+        }
+
+        protected void AssertThrows<E>(Action action) where E : Exception
+        {
+            try
+            {
+                action();
+                Assert.Equal("This should've thrown an exception", "It didn't");
+            }
+            catch(Exception ex)
+            {
+                Assert.True(ex is E, $"exception is type {typeof(E).Name}");
+            }
         }
     }
 }

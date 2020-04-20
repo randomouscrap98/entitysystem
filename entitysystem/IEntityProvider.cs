@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Randomous.EntitySystem
@@ -29,7 +30,8 @@ namespace Randomous.EntitySystem
         /// <returns></returns>
         Task<List<EntityValue>> GetEntityValuesAsync(EntityValueSearch search);
 
-        Task<List<E>> ListenAsync<E>(object listenId, Func<IQueryable<E>, IQueryable<E>> filter, TimeSpan maxWait) where E : EntityBase;
+        //Task<List<E>> ListenAsync<E>(object listenId, Func<IQueryable<E>, IQueryable<E>> filter) where E : EntityBase;
+        Task<List<E>> ListenAsync<E>(object listenId, Func<IQueryable<E>, IQueryable<E>> filter, TimeSpan maxWait, CancellationToken token) where E : EntityBase;
         List<ListenerData> Listeners {get;}
     }
 }

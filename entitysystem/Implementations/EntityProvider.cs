@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -86,7 +87,7 @@ namespace Randomous.EntitySystem.Implementations
             return query.GetListAsync(searcher.ApplyEntityValueSearch(query.GetQueryable<EntityValue>(), search));
         }
 
-        public async Task<List<E>> ListenAsync<E>(object listenId, Func<IQueryable<E>, IQueryable<E>> filter, TimeSpan maxWait) where E : EntityBase
+        public async Task<List<E>> ListenAsync<E>(object listenId, Func<IQueryable<E>, IQueryable<E>> filter, TimeSpan maxWait, CancellationToken token) where E : EntityBase
         {
             logger.LogTrace($"ListenNewAsync called for maxWait {maxWait}");
 
@@ -102,7 +103,7 @@ namespace Randomous.EntitySystem.Implementations
                     filter(q.Where(e => e is E).Cast<E>())
                 );
 
-                return (await signaler.ListenAsync(listenId, bigFilter, maxWait)).Cast<E>().ToList();
+                return (await signaler.ListenAsync(listenId, bigFilter, maxWait, token)).Cast<E>().ToList();
             }
         }
 

@@ -23,18 +23,19 @@ namespace Randomous.EntitySystem.Implementations
         {
             Signal.Dispose();
         }
+
+        public override string ToString() 
+        {
+            return $"{ListenerId} ({CreateDate})";
+        }
     }
 
     public class SignalSystem<T> : ISignaler<T>
     {
-        protected ILogger logger;
+        protected ILogger<SignalSystem<T>> logger;
 
         protected readonly object listenLock = new object();
         protected List<Listener<T>> listeners = new List<Listener<T>>();
-
-        //protected readonly object listenerListenLock = new object();
-        //protected List<
-        //protected readonly ManualResetEvent listenerListenSignal = new ManualResetEvent(false);
 
         public List<ListenerData> Listeners 
         {
@@ -100,20 +101,32 @@ namespace Randomous.EntitySystem.Implementations
         /// </summary>
         /// <param name="listener"></param>
         /// <param name="maxWait"></param>
-        /// <returns>Whether we got signaled or not</returns>
-        public async Task<bool> WaitForSignalAsync(Listener<T> listener, TimeSpan maxWait)
+        public Task WaitForSignalThrowAsync(Listener<T> listener, TimeSpan maxWait, CancellationToken token)
         {
-            bool signaled = false;
-            await Task.Run(() => signaled = listener.Signal.WaitOne(maxWait));
-            return signaled;
+            return Task.Run(() => 
+            {
+                var handlers = new List<WaitHandle>() { listener.Signal };
+
+                if(token != null)
+                    handlers.Add(((CancellationToken)token).WaitHandle);
+
+                int signalIndex = WaitHandle.WaitAny(handlers.ToArray(), maxWait); 
+                logger.LogDebug($"WaitForSignalAsync finished, index: {signalIndex}");
+
+                token.ThrowIfCancellationRequested();
+
+                if(signalIndex == WaitHandle.WaitTimeout)
+                    throw new TimeoutException($"Listener timed out {maxWait}");
+
+            }, token);
         }
 
-        public Task<List<T>> ListenAsync(object listenId, Func<T, bool> filter, TimeSpan maxWait)
+        public Task<List<T>> ListenAsync(object listenId, Func<T, bool> filter, TimeSpan maxWait, CancellationToken token)
         {
-            return ListenAsync(listenId, (q) => q.Where(x => filter(x)), maxWait);
+            return ListenAsync(listenId, (q) => q.Where(x => filter(x)), maxWait, token);
         }
 
-        public async Task<List<T>> ListenAsync(object listenId, Func<IQueryable<T>, IQueryable<T>> filter, TimeSpan maxWait)
+        public async Task<List<T>> ListenAsync(object listenId, Func<IQueryable<T>, IQueryable<T>> filter, TimeSpan maxWait, CancellationToken token)
         {
             logger.LogTrace($"ListenAsync called with id {listenId}, maxWait {maxWait}");
 
@@ -123,28 +136,27 @@ namespace Randomous.EntitySystem.Implementations
 
                 lock(listenLock)
                 {
+                    logger.LogDebug($"Adding listener {listener}");
                     listeners.Add(listener);
                 }
 
                 try
                 {
-                    //IF we got signaled, go ahead and return the signalers
-                    if (await WaitForSignalAsync(listener, maxWait))
-                    {
-                        //if(listener.Cancelled)
-                        //    throw new TaskCanceledException("The item");
-                        return listener.Signalers;
-                    }
-                    else
-                    {
-                        throw new TimeoutException($"Did not get signaled in time ({maxWait})");
-                    }
+                    await WaitForSignalThrowAsync(listener, maxWait, token);
+                    return listener.Signalers;
+                    //else if(token?.IsCancellationRequested == true)
+                    //    throw new OperationCanceledException("Listener cancelled");
+                    //else
+                    //    throw new TimeoutException("Didn't get signaled in time");
                 }
                 finally
                 {
                     //WE have to remove it because we added it
                     lock(listenLock)
+                    {
+                        logger.LogDebug($"Removing listener {listener}");
                         listeners.Remove(listener);
+                    }
                 }
             }
         }

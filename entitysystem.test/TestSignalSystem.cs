@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Randomous.EntitySystem.Implementations;
 using Xunit;
@@ -10,10 +11,12 @@ namespace Randomous.EntitySystem.test
     public class TestSignalSystem : UnitTestBase
     {
         protected SignalSystem<int> signaler;
+        protected CancellationTokenSource cancelSource;
 
         public TestSignalSystem()
         {
             signaler = CreateService<SignalSystem<int>>();
+            cancelSource = new CancellationTokenSource();
         }
 
         [Fact]
@@ -27,7 +30,7 @@ namespace Randomous.EntitySystem.test
 
         protected Task<List<int>> CreateSingleListen(int look, TimeSpan? listenTime = null)
         {
-            var task = signaler.ListenAsync(look, (x) => x == look, listenTime ?? TimeSpan.FromMinutes(1));
+            var task = signaler.ListenAsync(look, (x) => x == look, listenTime ?? TimeSpan.FromMinutes(1), CancellationToken.None);
             Assert.False(task.IsCompleted); //There should be no signals yet
             return task;
         }
@@ -64,7 +67,7 @@ namespace Randomous.EntitySystem.test
         [Fact]
         public void MultiSignal()
         {
-            var task = signaler.ListenAsync(1, (e) => true, TimeSpan.FromMinutes(1));
+            var task = signaler.ListenAsync(1, (e) => true, TimeSpan.FromMinutes(1), CancellationToken.None);
             var result = signaler.SignalItems(new[] {9,7});
             Assert.True(result.ContainsKey(9));
             Assert.Equal(1, result[9]);  //A single listener (us)
@@ -106,6 +109,28 @@ namespace Randomous.EntitySystem.test
             result = signaler.SignalItems(new[] {7});
             AssertListen(task7, new List<int>() {7});
             Assert.Empty(signaler.Listeners);
+        }
+
+        [Fact]
+        public void CancelListenerCheck()
+        {
+            var task = signaler.ListenAsync(9, (x) => x == 9, TimeSpan.FromMinutes(1), cancelSource.Token);
+            var task7 = CreateSingleListen(7);
+            Assert.True(signaler.Listeners.Count == 2, "two listeners");
+            cancelSource.Cancel();
+            try
+            {
+                var result = task.Result;
+                throw new InvalidOperationException("Should've thrown cancel exception!");
+            }
+            catch(AggregateException ex)
+            {
+                Assert.IsType<TaskCanceledException>(ex.InnerException);
+            }
+            //AssertThrows<Exception>(() => task.Wait(100));
+            //AssertNotWait(task7);//.Wait(1);
+            //System.Threading.Thread.Sleep(100);
+            Assert.Single(signaler.Listeners);//, "listeners single");
         }
     }
 }
