@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Randomous.EntitySystem.Implementations;
@@ -32,6 +33,25 @@ namespace Randomous.EntitySystem.test
             provider.WriteAsync(NewEntity(), NewEntity()).Wait();
             var entities = provider.GetEntitiesAsync(new EntitySearch() {CreateEnd = DateTime.Now.AddSeconds(10)}).Result;
             Assert.Equal(2, entities.Count);
+        }
+
+        [Fact]
+        public void RandomSort()
+        {
+            List<Entity> entities = new List<Entity>();
+            for(var i = 0; i < 100; i++)
+                entities.Add(NewEntity());
+
+            provider.WriteAsync(entities.ToArray()).Wait();
+
+
+            var search = new EntitySearch();
+            search.Sort = "random";
+
+            var result = provider.GetEntitiesAsync(search).Result;
+            var result2 = provider.GetEntitiesAsync(search).Result;
+
+            Assert.False(result.Select(x => x.id).SequenceEqual(result2.Select(x => x.id)));
         }
 
         [Fact]

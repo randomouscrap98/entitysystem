@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
@@ -58,10 +59,22 @@ namespace Randomous.EntitySystem.Implementations
         /// <returns></returns>
         public IQueryable<T> ApplyFinal<T>(IQueryable<T> query, EntitySearchBase search) where T : EntityBase
         {
-            if(search.Reverse)
-                query = query.OrderByDescending(x => x.id);
-            else
-                query = query.OrderBy(x => x.id);
+            var sort = search.Sort.ToLower();
+
+            if(sort == "id")
+            {
+                if (search.Reverse)
+                    query = query.OrderByDescending(x => x.id);
+                else
+                    query = query.OrderBy(x => x.id);
+            }
+            else if(sort == "random")
+            {
+                long modulo = 131071; //8191;
+                long random = (new Random()).Next() & modulo;
+                //query = query.OrderBy(x => ((x.id + random) * 7459) & modulo);
+                query = query.OrderBy(x => ((x.id + random) * 66284) & modulo);
+            }
 
             if(search.Skip >= 0)
                 query = query.Skip(search.Skip);

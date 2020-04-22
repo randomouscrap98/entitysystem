@@ -26,6 +26,9 @@ namespace Randomous.EntitySystem
         public long MinId {get;set;} = -1;
         public int Limit {get;set;} = -1;
         public int Skip {get;set;} = -1;
+
+        public string Sort {get;set;} = "id";
+
         public bool Reverse {get;set;} = false;
     }
 

@@ -291,6 +291,30 @@ namespace Randomous.EntitySystem.test
 
         [Fact]
         public void SearchEntityRelationMaxMin() { SimpleMaxMinTest<EntityRelation, EntityRelationSearch>((s, e) => searcher.ApplyEntityRelationSearch(e, s)); }
+
+        protected void SimpleSortTest<E,S>(Func<S, IQueryable<E>, IQueryable<E>> applySearch) where E : EntityBase, new () where S : EntitySearchBase, new()
+        {
+            var entities = BasicDataset<E>();
+            var search = new S();
+
+            search.Sort = "random";
+            var result = applySearch(search, entities);
+            var result2 = applySearch(search, entities);
+
+            Assert.False(result.Select(x => x.id).SequenceEqual(result2.Select(x => x.id)));
+        }
+
+        [Fact]
+        public void SearchBaseSort() { SimpleSortTest<EntityBase, EntitySearchBase>((s, e) => searcher.ApplyGeneric<EntityBase>(e, s)); }
+
+        [Fact]
+        public void SearchEntitySort() { SimpleSortTest<Entity, EntitySearch>((s, e) => searcher.ApplyEntitySearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityValueSort() { SimpleSortTest<EntityValue, EntityValueSearch>((s, e) => searcher.ApplyEntityValueSearch(e, s)); }
+
+        [Fact]
+        public void SearchEntityRelationSort() { SimpleSortTest<EntityRelation, EntityRelationSearch>((s, e) => searcher.ApplyEntityRelationSearch(e, s)); }
     }
 
     //public class TestEntitySearchLive : TestEntitySearcher
