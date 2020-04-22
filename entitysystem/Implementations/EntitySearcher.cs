@@ -61,7 +61,7 @@ namespace Randomous.EntitySystem.Implementations
         {
             var sort = search.Sort.ToLower();
 
-            if(sort == "id")
+            if(sort == "id" || string.IsNullOrWhiteSpace(sort))
             {
                 if (search.Reverse)
                     query = query.OrderByDescending(x => x.id);
