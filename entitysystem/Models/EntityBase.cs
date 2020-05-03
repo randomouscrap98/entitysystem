@@ -31,7 +31,7 @@ namespace Randomous.EntitySystem
         protected virtual bool EqualsSelf(object obj)
         {
             var other = (EntityBase)obj;
-            return other.id == id && other.createDate == createDate;
+            return other.id == id && other.createDateProper() == createDateProper();
         }
 
         public override bool Equals(object obj)

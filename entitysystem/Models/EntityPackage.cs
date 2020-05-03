@@ -27,8 +27,16 @@ namespace Randomous.EntitySystem
             if(obj != null && obj is EntityPackage)
             {
                 var other = (EntityPackage)obj;
-                return Entity.Equals(other.Entity) && Values.SequenceEqual(other.Values)
-                    && Relations.SequenceEqual(other.Relations);
+
+                //Warn: there is a CHANCE... that this will give false positives. For instance:
+                //if we have two relations that are exactly the same but the "other" has
+                //two different relations, one of which is the same. The chances of that are
+                //extremely slim (especially considering the ids must be the same)... but still possible.
+                return Entity.Equals(other.Entity) && 
+                    Values.Count == other.Values.Count &&
+                    Relations.Count == other.Relations.Count &&
+                    Values.All(x => other.Values.Contains(x)) &&
+                    Relations.All(x => other.Relations.Contains(x));
             }
             else
             {

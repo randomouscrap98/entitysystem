@@ -77,22 +77,6 @@ namespace Randomous.EntitySystem.Extensions
                 Values = values.Where(y => y.entityId == x.id).ToList(),
                 Relations = relations.Where(y => y.entityId2 == x.id).ToList()
             }).ToList();
-
-            //var bigGroup = from e in queryable
-            //               join v in provider.GetQueryable<EntityValue>() on e.id equals v.entityId into evs
-            //               from v in evs.DefaultIfEmpty()
-            //               join r in provider.GetQueryable<EntityRelation>() on e.id equals r.entityId2 into evrs
-            //               from r in evrs.DefaultIfEmpty()
-            //               select new { Entity = e, Value = v, Relation = r};
-            
-            //var grouping = (await provider.GetListAsync(bigGroup)).ToLookup(x => x.Entity.id);
-
-            //return grouping.Select(x => new EntityPackage()
-            //{
-            //    Entity = x.First().Entity,
-            //    Values = x.Select(y => y.Value).ToList(),
-            //    Relations = x.Select(y => y.Relation).ToList()
-            //}).ToList();
         }
 
         /// <summary>
