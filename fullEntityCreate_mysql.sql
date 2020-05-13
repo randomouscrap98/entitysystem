@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS EntityValues (
 	`id`	BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	createDate	DATETIME,
 	entityId	BIGINT NOT NULL,
-	`key`    VARCHAR(250),
+	`key`    VARCHAR(128),
 	`value`  VARCHAR(10000)
 );
 CREATE TABLE IF NOT EXISTS EntityRelations (
@@ -11,14 +11,14 @@ CREATE TABLE IF NOT EXISTS EntityRelations (
 	createDate	DATETIME,
 	entityId1	BIGINT NOT NULL,
 	entityId2	BIGINT NOT NULL,
-	`type`   VARCHAR(250),
+	`type`   VARCHAR(128),
 	`value`  VARCHAR(10000)
 );
 CREATE TABLE IF NOT EXISTS Entities (
 	`id`	BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	createDate	DATETIME,
-	`type`	VARCHAR(256),
-	`name`	VARCHAR(1024),
+	`type`	VARCHAR(128),
+	`name`	VARCHAR(512),
 	content MEDIUMTEXT
 );
 CREATE INDEX entityRelationId1Index ON EntityRelations (

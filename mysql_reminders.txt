@@ -1,0 +1,25 @@
+Mysql is ridiculous and everything needs to be:
+ Character Set utf8mb4
+ Collation utf8mb4_unicode_ci (case insensitive)
+ 
+utf8 in mysql is BMP, or 3 bytes / not emoji etc.
+
+
+To test for character set, you can run:
+
+SELECT table_name, column_name, character_set_name FROM information_schema.`COLUMNS`  WHERE table_schema = "contentapi";
+
+
+To check tables for collation and field sizes (indexes are limited in size and you're going from 3 to 4 bytes):
+
+SHOW FULL COLUMNS FROM Entities;
+
+
+To alter database to force utf8mb4:
+
+alter database contentapi character set utf8mb4 collate = utf8mb4_unicode_ci;
+
+
+To alter an existing table:
+
+alter table EntityValues convert to character set utf8mb4 collate utf8mb4_unicode_ci;
