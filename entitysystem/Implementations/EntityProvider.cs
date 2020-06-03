@@ -7,21 +7,28 @@ using Microsoft.Extensions.Logging;
 
 namespace Randomous.EntitySystem.Implementations
 {
+    public class EntityProviderConfig
+    {
+        public TimeSpan DualListenCancelMinimum = TimeSpan.FromMilliseconds(3);
+    }
+
     public class EntityProvider : IEntityProvider
     {
         protected ILogger<EntityProvider> logger;
         protected ISignaler<EntityBase> signaler;
         protected IEntityQueryable query;
         protected IEntitySearcher searcher;
+        protected EntityProviderConfig config;
 
 
         public EntityProvider(ILogger<EntityProvider> logger, IEntityQueryable query,
-            IEntitySearcher searcher, ISignaler<EntityBase> signaler)
+            IEntitySearcher searcher, ISignaler<EntityBase> signaler, EntityProviderConfig config)
         {
             this.logger = logger;
             this.query = query;
             this.searcher = searcher;
             this.signaler = signaler;
+            this.config = config;
         }
 
         public IQueryable<T> ApplyFinal<T>(IQueryable<T> query, EntitySearchBase search) where T : EntityBase
@@ -91,19 +98,32 @@ namespace Randomous.EntitySystem.Implementations
         {
             logger.LogTrace($"ListenNewAsync called for maxWait {maxWait}");
 
-            var results = await query.GetListAsync(filter(query.GetQueryable<E>().Select(x => (E)x)));
-
-            if(results.Count > 0)
+            using (CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token))
             {
-                return results;
-            }
-            else
-            {
-                var bigFilter = new Func<IQueryable<EntityBase>, IQueryable<EntityBase>>(q =>
-                    filter(q.Where(e => e is E).Cast<E>())
-                );
+                //We MUST start listening FIRST so we DON'T miss anything AT ALL (we could miss valuable signals that occur while reading initially)
+                var listener = signaler.ListenAsync(listenId, q => filter(q.Where(e => e is E).Cast<E>()), maxWait, linkedCts.Token);
 
-                return (await signaler.ListenAsync(listenId, bigFilter, maxWait, token)).Cast<E>().ToList();
+                DateTime start = DateTime.Now; //Putting this down here to minimize startup time before listen (not that this little variable really matters)
+                var results = await query.GetListAsync(filter(query.GetQueryable<E>().Select(x => (E)x)));
+
+                if (results.Count > 0)
+                {
+                    linkedCts.Cancel();
+
+                    if(!listener.Wait((int)Math.Max((maxWait - (DateTime.Now - start)).TotalMilliseconds, config.DualListenCancelMinimum.TotalMilliseconds)))
+                    {
+                        logger.LogWarning("Pre-emptive listener did not cancel in time! Attempting to dispose, this could throw!!");
+
+                        try { listener.Dispose(); }
+                        catch(Exception ex) { logger.LogError($"EXCEPTION WHILE DISPOSING LISTENER: {ex}"); }
+                    }
+
+                    return results;
+                }
+                else
+                {
+                    return (await listener).Cast<E>().ToList();
+                }
             }
         }
 

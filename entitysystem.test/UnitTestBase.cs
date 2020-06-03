@@ -14,31 +14,37 @@ namespace Randomous.EntitySystem.test
 {
     public class UnitTestBase : IDisposable
     {
-        public List<SqliteConnection> connections = new List<SqliteConnection>();
-        public string SqliteConnectionString = "Data Source=:memory:;";
+        //public List<SqliteConnection> connections = new List<SqliteConnection>();
+        //public string SqliteConnectionString = "Data Source=:memory:;";
+        public SqliteConnection connection; // = new List<SqliteConnection>();
+        //public string 
 
         protected DefaultServiceProvider serviceProvider;
 
         public UnitTestBase()
         {
+            connection = new SqliteConnection("Data Source=:memory:;");
+            connection.Open();
             serviceProvider = new DefaultServiceProvider();
         }
 
         public void Dispose()
         {
-            foreach(var con in connections)
-            {
-                try { con.Close(); }
-                catch(Exception) { }
-            }
+            try { connection.Close(); }
+            catch(Exception) { }
+            //foreach(var con in connections)
+            //{
+            //    try { con.Close(); }
+            //    catch(Exception) { }
+            //}
         }
 
         public IServiceCollection CreateServices()
         {
             //Whhyyyy am I doing it like this.
-            var connection = new SqliteConnection(SqliteConnectionString);
-            connection.Open();
-            connections.Append(connection);
+            //var connection = new SqliteConnection(SqliteConnectionString);
+            //connection.Open();
+            //connections.Append(connection);
 
             var services = new ServiceCollection();
             services.AddLogging(configure => 
@@ -74,7 +80,7 @@ namespace Randomous.EntitySystem.test
 
         public void AssertNotWait(Task task)
         {
-            Assert.False(task.Wait(1));
+            Assert.False(task.Wait(10));
             Assert.False(task.IsCompleted);
         }
 

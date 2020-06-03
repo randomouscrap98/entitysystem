@@ -1,4 +1,5 @@
 using System.IO;
+using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace Randomous.EntitySystem.test
@@ -9,7 +10,12 @@ namespace Randomous.EntitySystem.test
         public void CreateBaseEntityDatabase()
         {
             var dbFile = @"..\..\..\..\baseEntitySqlite.db";
-            SqliteConnectionString = $"Data Source='{dbFile}';";
+
+            if(File.Exists(dbFile))
+                File.Delete(dbFile);
+
+            connection = new SqliteConnection($"Data Source='{dbFile}';");
+            connection.Open();
 
             var context = CreateService<BaseEntityContext>();
             context.Database.EnsureCreated();
