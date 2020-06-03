@@ -90,5 +90,19 @@ namespace Randomous.EntitySystem.test
             Assert.Single(result);
             Assert.Equal(entity, result.First());
         }
+
+        [Fact]
+        public void ListenInstant()
+        {
+            //We're listening with something available
+            var entity = NewEntity();
+            provider.WriteAsync(entity).Wait();
+
+            var task = provider.ListenAsync<Entity>(1, (q) => q.Where(e => e.id > 0), TimeSpan.FromMinutes(1), CancellationToken.None);
+
+            var result = AssertWait(task);
+            Assert.Single(result);
+            Assert.Equal(entity, result.First());
+        }
     }
 }

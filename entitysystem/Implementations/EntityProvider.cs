@@ -7,10 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Randomous.EntitySystem.Implementations
 {
-    public class EntityProviderConfig
-    {
-        public TimeSpan DualListenCancelMinimum = TimeSpan.FromMilliseconds(3);
-    }
+    //public class EntityProviderConfig
+    //{
+    //    public TimeSpan DualListenCancelMinimum = TimeSpan.FromMilliseconds(3);
+    //}
 
     public class EntityProvider : IEntityProvider
     {
@@ -18,17 +18,17 @@ namespace Randomous.EntitySystem.Implementations
         protected ISignaler<EntityBase> signaler;
         protected IEntityQueryable query;
         protected IEntitySearcher searcher;
-        protected EntityProviderConfig config;
+        //protected EntityProviderConfig config;
 
 
         public EntityProvider(ILogger<EntityProvider> logger, IEntityQueryable query,
-            IEntitySearcher searcher, ISignaler<EntityBase> signaler, EntityProviderConfig config)
+            IEntitySearcher searcher, ISignaler<EntityBase> signaler) //, EntityProviderConfig config)
         {
             this.logger = logger;
             this.query = query;
             this.searcher = searcher;
             this.signaler = signaler;
-            this.config = config;
+            //this.config = config;
         }
 
         public IQueryable<T> ApplyFinal<T>(IQueryable<T> query, EntitySearchBase search) where T : EntityBase
@@ -110,13 +110,19 @@ namespace Randomous.EntitySystem.Implementations
                 {
                     linkedCts.Cancel();
 
-                    if(!listener.Wait((int)Math.Max((maxWait - (DateTime.Now - start)).TotalMilliseconds, config.DualListenCancelMinimum.TotalMilliseconds)))
+                    try
                     {
-                        logger.LogWarning("Pre-emptive listener did not cancel in time! Attempting to dispose, this could throw!!");
+                        //Yes, we are so confident that we don't even worry about waiting properly
+                        await listener;
+                        //if (!listener.Wait((int)Math.Max((maxWait - (DateTime.Now - start)).TotalMilliseconds, config.DualListenCancelMinimum.TotalMilliseconds)))
+                        //{
+                        //    logger.LogWarning("Pre-emptive listener did not cancel in time! Attempting to dispose, this could throw!!");
 
-                        try { listener.Dispose(); }
-                        catch(Exception ex) { logger.LogError($"EXCEPTION WHILE DISPOSING LISTENER: {ex}"); }
+                        //    try { listener.Dispose(); }
+                        //    catch (Exception ex) { logger.LogError($"EXCEPTION WHILE DISPOSING LISTENER: {ex}"); }
+                        //}
                     }
+                    catch(OperationCanceledException) {} //This is expected
 
                     return results;
                 }

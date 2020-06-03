@@ -14,10 +14,7 @@ namespace Randomous.EntitySystem.test
 {
     public class UnitTestBase : IDisposable
     {
-        //public List<SqliteConnection> connections = new List<SqliteConnection>();
-        //public string SqliteConnectionString = "Data Source=:memory:;";
-        public SqliteConnection connection; // = new List<SqliteConnection>();
-        //public string 
+        public SqliteConnection connection;
 
         protected DefaultServiceProvider serviceProvider;
 
@@ -32,20 +29,10 @@ namespace Randomous.EntitySystem.test
         {
             try { connection.Close(); }
             catch(Exception) { }
-            //foreach(var con in connections)
-            //{
-            //    try { con.Close(); }
-            //    catch(Exception) { }
-            //}
         }
 
         public IServiceCollection CreateServices()
         {
-            //Whhyyyy am I doing it like this.
-            //var connection = new SqliteConnection(SqliteConnectionString);
-            //connection.Open();
-            //connections.Append(connection);
-
             var services = new ServiceCollection();
             services.AddLogging(configure => 
             {
@@ -54,8 +41,6 @@ namespace Randomous.EntitySystem.test
                 configure.AddSerilog(seriConfig.CreateLogger());
                 configure.AddDebug();
                 configure.SetMinimumLevel(LogLevel.Trace);
-                //configure.
-                //configure.SetMinimumLevel(LogLevel.Trace);
             });
             serviceProvider.AddDefaultServices(
                 services, 

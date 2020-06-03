@@ -301,7 +301,7 @@ namespace Randomous.EntitySystem.test
             var result = applySearch(search, entities);
             var result2 = applySearch(search, entities);
 
-            Assert.False(result.Select(x => x.id).SequenceEqual(result2.Select(x => x.id)));
+            Assert.False(result.Select(x => x.id).SequenceEqual(result2.Select(x => x.id)), "Random sort produced same sequence!");
         }
 
         [Fact]
