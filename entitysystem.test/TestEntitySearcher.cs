@@ -126,6 +126,42 @@ namespace Randomous.EntitySystem.test
         public void SearchEntityValueEntity() { 
             SimpleIdsTest<EntityValue, EntityValueSearch>((s, e) => searcher.ApplyEntityValueSearch(e, s), s => s.EntityIds, e => e.entityId); }
 
+        protected void SimpleNotIdsTest<E,S>(Func<S, IQueryable<E>, IQueryable<E>> applySearch, Func<S, IList<long>> searchIdGet, Func<E, long> fieldGet) where E : EntityBase, new () where S : EntitySearchBase, new()
+        {
+            var entities = BasicDataset<E>();
+            var search = new S();
+
+            //Try searching for 1 or more ids
+            searchIdGet(search).Add(1);
+            var result = applySearch(search, entities);
+            AssertResultsEqual(entities.Where(x => fieldGet(x) != 1), result);
+
+            searchIdGet(search).Add(20);
+            result = applySearch(search, entities);
+            AssertResultsEqual(entities.Where(x => fieldGet(x)!= 1 && fieldGet(x) != 20), result);
+
+            searchIdGet(search).Add(1); //It SHOULD BE acceptable to have duplicates
+            result = applySearch(search, entities);
+            AssertResultsEqual(entities.Where(x => fieldGet(x) != 1 && fieldGet(x) != 20), result);
+            Assert.Equal(entities.Count() - 2, result.Count());
+        }
+
+        [Fact]
+        public void SearchBaseNotIds() { 
+            SimpleNotIdsTest<EntityBase, EntitySearchBase>((s, e) => searcher.ApplyGeneric<EntityBase>(e, s), s => s.NotIds, e => e.id); }
+
+        [Fact]
+        public void SearchEntityNotIds() { 
+            SimpleNotIdsTest<Entity, EntitySearch>((s, e) => searcher.ApplyEntitySearch(e, s), s => s.NotIds, e => e.id); }
+
+        [Fact]
+        public void SearchEntityValueNotIds() { 
+            SimpleNotIdsTest<EntityValue, EntityValueSearch>((s, e) => searcher.ApplyEntityValueSearch(e, s), s => s.NotIds, e => e.id); }
+
+        [Fact]
+        public void SearchEntityRelationNotIds() { 
+            SimpleNotIdsTest<EntityRelation, EntityRelationSearch>((s, e) => searcher.ApplyEntityRelationSearch(e, s), s => s.NotIds, e => e.id); }
+
         protected void SimpleDatesTest<E,S>(Func<S, IQueryable<E>, IQueryable<E>> applySearch) where E : EntityBase, new() where S : EntitySearchBase, new()
         {
             var entities = BasicDataset<E>();
@@ -166,7 +202,7 @@ namespace Randomous.EntitySystem.test
             set(12, "lons");
 
             //Just for fun
-            for(int i = 11; i < 20; i++)
+            for(int i = 20; i < 30; i++)
                 set(i, "");
 
             return Tuple.Create("%one%", entities.Where(x => x.id == 4 || x.id == 6 || x.id == 8 || x.id == 10));
@@ -217,6 +253,72 @@ namespace Randomous.EntitySystem.test
         {
             SimpleStringLikeTest<EntityValue>((e, s) => e.value = s, (s, e) => {
                 return searcher.ApplyEntityValueSearch(e, new EntityValueSearch() {ValueLike = s});
+            });
+        }
+
+        protected Tuple<List<string>, IQueryable<E>> SetupStringContainsTest<E>(Action<E, string> setField, IQueryable<E> entities) where E : EntityBase
+        {
+            var set = new Action<long, string>((i, s) => setField(entities.First(x => x.id == i), s));
+
+            //Set some to have some names/types
+            set(4, "one");
+            set(6, "ones");
+            set(8, "lone");
+            set(10, "lones");
+            set(12, "lons");
+
+            //Just for fun
+            for(int i = 20; i < 30; i++)
+                set(i, "");
+
+            return Tuple.Create(new List<string>() {"one", "lone", "lons"}, entities.Where(x => x.id == 4 || x.id == 8 || x.id == 12));
+        }
+
+        protected void SimpleStringContainsTest<E>(Action<E, string> setField, Func<List<string>, IQueryable<E>, IQueryable<E>> doSearch) where E : EntityBase, new()
+        {
+            var entities = BasicDataset<E>();
+            var setup = SetupStringContainsTest(setField, entities);
+            var result = doSearch(setup.Item1, entities);
+            AssertResultsEqual(setup.Item2, result);
+        }
+
+        [Fact]
+        public void SearchEntityCType()
+        {
+            SimpleStringContainsTest<Entity>((e, s) => e.type = s, (s, e) => {
+                return searcher.ApplyEntitySearch(e, new EntitySearch() {Types = s});
+            });
+        }
+
+        [Fact]
+        public void SearchEntityCName()
+        {
+            SimpleStringContainsTest<Entity>((e, s) => e.name = s, (s, e) => {
+                return searcher.ApplyEntitySearch(e, new EntitySearch() {Names = s});
+            });
+        }
+
+        [Fact]
+        public void SearchRelationCType()
+        {
+            SimpleStringContainsTest<EntityRelation>((e, s) => e.type = s, (s, e) => {
+                return searcher.ApplyEntityRelationSearch(e, new EntityRelationSearch() {Types= s});
+            });
+        }
+
+        [Fact]
+        public void SearchValueCKey()
+        {
+            SimpleStringContainsTest<EntityValue>((e, s) => e.key = s, (s, e) => {
+                return searcher.ApplyEntityValueSearch(e, new EntityValueSearch() {Keys = s});
+            });
+        }
+
+        [Fact]
+        public void SearchValueCValue()
+        {
+            SimpleStringContainsTest<EntityValue>((e, s) => e.value = s, (s, e) => {
+                return searcher.ApplyEntityValueSearch(e, new EntityValueSearch() {Values = s});
             });
         }
 

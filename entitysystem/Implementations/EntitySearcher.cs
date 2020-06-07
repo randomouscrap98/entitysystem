@@ -33,6 +33,8 @@ namespace Randomous.EntitySystem.Implementations
         {
             if(search.Ids.Count > 0)
                 query = query.Where(x => search.Ids.Contains(x.id));
+            if(search.NotIds.Count > 0)
+                query = query.Where(x => !search.NotIds.Contains(x.id));
 
             if(search.CreateEnd.Ticks > 0)
                 query = query.Where(x => x.createDate <= search.CreateEnd);
@@ -90,9 +92,13 @@ namespace Randomous.EntitySystem.Implementations
             
             if(!string.IsNullOrEmpty(search.NameLike))
                 query = query.Where(x => EF.Functions.Like(x.name, search.NameLike));
-
             if(!string.IsNullOrEmpty(search.TypeLike))
                 query = query.Where(x => EF.Functions.Like(x.type, search.TypeLike));
+
+            if(search.Names.Count > 0)
+                query = query.Where(x => search.Names.Contains(x.name));
+            if(search.Types.Count > 0)
+                query = query.Where(x => search.Types.Contains(x.type));
 
             if(finalize)
                 query = ApplyFinal(query, search);
@@ -106,9 +112,13 @@ namespace Randomous.EntitySystem.Implementations
 
             if(!string.IsNullOrEmpty(search.KeyLike))
                 query = query.Where(x => EF.Functions.Like(x.key, search.KeyLike));
-
             if(!string.IsNullOrEmpty(search.ValueLike))
                 query = query.Where(x => EF.Functions.Like(x.value, search.ValueLike));
+
+            if(search.Values.Count > 0)
+                query = query.Where(x => search.Values.Contains(x.value));
+            if(search.Keys.Count > 0)
+                query = query.Where(x => search.Keys.Contains(x.key));
 
             if(search.EntityIds.Count > 0)
                 query = query.Where(x => search.EntityIds.Contains(x.entityId));
@@ -125,6 +135,9 @@ namespace Randomous.EntitySystem.Implementations
 
             if(!string.IsNullOrEmpty(search.TypeLike))
                 query = query.Where(x => EF.Functions.Like(x.type, search.TypeLike));
+
+            if(search.Types.Count > 0)
+                query = query.Where(x => search.Types.Contains(x.type));
 
             if(search.EntityIds1.Count > 0)
                 query = query.Where(x => search.EntityIds1.Contains(x.entityId1));

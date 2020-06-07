@@ -114,13 +114,6 @@ namespace Randomous.EntitySystem.Implementations
                     {
                         //Yes, we are so confident that we don't even worry about waiting properly
                         await listener;
-                        //if (!listener.Wait((int)Math.Max((maxWait - (DateTime.Now - start)).TotalMilliseconds, config.DualListenCancelMinimum.TotalMilliseconds)))
-                        //{
-                        //    logger.LogWarning("Pre-emptive listener did not cancel in time! Attempting to dispose, this could throw!!");
-
-                        //    try { listener.Dispose(); }
-                        //    catch (Exception ex) { logger.LogError($"EXCEPTION WHILE DISPOSING LISTENER: {ex}"); }
-                        //}
                     }
                     catch(OperationCanceledException) {} //This is expected
 

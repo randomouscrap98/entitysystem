@@ -14,6 +14,8 @@ namespace Randomous.EntitySystem
         public DateTime CreateStart {get;set;} = new DateTime(0);
         public DateTime CreateEnd {get;set;} = new DateTime(0);
 
+        public List<long> NotIds {get;set;} = new List<long>();
+
         /// <summary>
         /// Only ids strictly lower 
         /// </summary>
@@ -39,6 +41,9 @@ namespace Randomous.EntitySystem
     {
         public string TypeLike {get;set;} = "";
         public string NameLike {get;set;} = "";
+
+        public List<string> Types {get;set;} = new List<string>();
+        public List<string> Names {get;set;} = new List<string>();
     }
 
     /// <summary>
@@ -54,6 +59,9 @@ namespace Randomous.EntitySystem
         public string KeyLike {get;set;} = "";
         public string ValueLike {get;set;} = "";
         public List<long> EntityIds {get;set;} = new List<long>();
+
+        public List<string> Keys {get;set;} = new List<string>();
+        public List<string> Values {get;set;} = new List<string>();
     }
 
     /// <summary>
@@ -62,6 +70,7 @@ namespace Randomous.EntitySystem
     public class EntityRelationSearch : EntitySearchBase
     {
         public string TypeLike {get;set;} = "";
+        public List<string> Types {get;set;} = new List<string>();
         public List<long> EntityIds1 {get;set;} = new List<long>();
         public List<long> EntityIds2 {get;set;} = new List<long>();
     }
