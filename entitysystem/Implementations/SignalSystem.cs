@@ -108,7 +108,7 @@ namespace Randomous.EntitySystem.Implementations
                 var handlers = new List<WaitHandle>() { listener.Signal };
 
                 if(token != null)
-                    handlers.Add(((CancellationToken)token).WaitHandle);
+                    handlers.Add(token.WaitHandle);
 
                 int signalIndex = WaitHandle.WaitAny(handlers.ToArray(), maxWait); 
                 logger.LogDebug($"WaitForSignalAsync finished, index: {signalIndex}");
@@ -144,10 +144,6 @@ namespace Randomous.EntitySystem.Implementations
                 {
                     await WaitForSignalThrowAsync(listener, maxWait, token);
                     return listener.Signalers;
-                    //else if(token?.IsCancellationRequested == true)
-                    //    throw new OperationCanceledException("Listener cancelled");
-                    //else
-                    //    throw new TimeoutException("Didn't get signaled in time");
                 }
                 finally
                 {
