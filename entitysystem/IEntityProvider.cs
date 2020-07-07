@@ -9,6 +9,8 @@ namespace Randomous.EntitySystem
     //A provider is everything wrapped up together
     public interface IEntityProvider : IEntityQueryable, IEntitySearcher //, IEntityExpander
     {
+        int ConcurrentAccess {get;set;}
+
         /// <summary>
         /// A shortcut for simple retrieval of entities
         /// </summary>

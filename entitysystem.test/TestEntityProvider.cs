@@ -14,6 +14,7 @@ namespace Randomous.EntitySystem.test
         public TestEntityProvider()
         {
             provider = CreateService<EntityProvider>();
+            provider.ConcurrentAccess = 1;
         }
 
         protected Entity NewEntity()
