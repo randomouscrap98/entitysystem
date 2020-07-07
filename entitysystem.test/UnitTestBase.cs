@@ -31,7 +31,7 @@ namespace Randomous.EntitySystem.test
             catch(Exception) { }
         }
 
-        public IServiceCollection CreateServices()
+        public virtual IServiceCollection CreateServices()
         {
             var services = new ServiceCollection();
             services.AddLogging(configure => 
@@ -46,6 +46,7 @@ namespace Randomous.EntitySystem.test
                 services, 
                 options => options.UseSqlite(connection).EnableSensitiveDataLogging(true),
                     d => d.Database.EnsureCreated());
+            services.AddSingleton(new EntityQueryableEfCoreConfig() { ConcurrentAccess = 1}); //only want single access for tests
 
             return services;
         }

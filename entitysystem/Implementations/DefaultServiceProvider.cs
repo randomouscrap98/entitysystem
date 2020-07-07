@@ -14,6 +14,7 @@ namespace Randomous.EntitySystem.Implementations
             //services.AddTransient<ISignaler<EntityBase>, SignalSystem<EntityBase>>(); //you may think the signaler needs to be a singleton. Not always... people can add that themselves.
             services.AddSingleton(typeof(ISignaler<>), typeof(SignalSystem<>)); //No, this is setup for a STANDARD use case which would WANT a single signaller
             services.AddTransient<IEntityProvider, EntityProvider>();
+            services.AddSingleton<EntityQueryableEfCoreConfig>(); //Just get some defaults in there...
             //services.AddTransient<EntityProviderConfig>();
             services.AddDbContext<BaseEntityContext>(buildContext);
             services.AddScoped<DbContext, BaseEntityContext>(s =>

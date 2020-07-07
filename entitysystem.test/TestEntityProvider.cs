@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
 using Randomous.EntitySystem.Implementations;
 using Xunit;
 
@@ -14,7 +15,6 @@ namespace Randomous.EntitySystem.test
         public TestEntityProvider()
         {
             provider = CreateService<EntityProvider>();
-            provider.ConcurrentAccess = 1;
         }
 
         protected Entity NewEntity()

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Randomous.EntitySystem
@@ -18,6 +19,16 @@ namespace Randomous.EntitySystem
         /// <typeparam name="E"></typeparam>
         /// <returns></returns>
         Task<List<E>> GetListAsync<E>(IQueryable<E> query);
+
+        /// <summary>
+        /// The completion of a query into a concrete max scalar.async Run this against your completed query.
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="selector"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="E"></typeparam>
+        /// <returns></returns>
+        Task<T> GetMaxAsync<T,E>(IQueryable<E> query, Expression<Func<E, T>> selector);
 
         /// <summary>
         /// Quick shortcut to get all of type E

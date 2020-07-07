@@ -92,6 +92,18 @@ namespace Randomous.EntitySystem.test
             Assert.Equal(newEntity, entities.First()); //assume this works correctly (is it safe to assume?)
             //Assert.Equal(entities.First().createDate)
         }
+
+        public virtual void GetMaxAsync()
+        {
+            var writeEntries = new List<Entity>();
+
+            for(var i = 0; i < 10; i++)
+                writeEntries.Add(NewEntity());
+
+            queryable.WriteAsync(writeEntries.ToArray()).Wait();
+
+            Assert.True(queryable.GetMaxAsync(queryable.GetQueryable<Entity>(), x => x.id).Result >= 10);
+        }
     }
 
     public class TestEntityQueryableEfCore : TestEntityQueryableBase
@@ -107,6 +119,7 @@ namespace Randomous.EntitySystem.test
         [Fact] public override void SimpleDeleteTest() { base.SimpleDeleteTest(); }
         [Fact] public override void MultiWriteTest() { base.MultiWriteTest(); }
         [Fact]public override void NonTrackedUpdateTest() { base.NonTrackedUpdateTest(); }
+        [Fact]public override void GetMaxAsync() { base.GetMaxAsync(); }
     }
 
     public class TestEntityQueryableMemory: TestEntityQueryableBase
@@ -122,5 +135,6 @@ namespace Randomous.EntitySystem.test
         [Fact] public override void SimpleDeleteTest() { base.SimpleDeleteTest(); }
         [Fact] public override void MultiWriteTest() { base.MultiWriteTest(); }
         [Fact]public override void NonTrackedUpdateTest() { base.NonTrackedUpdateTest(); }
+        [Fact]public override void GetMaxAsync() { base.GetMaxAsync(); }
     }
 }
