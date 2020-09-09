@@ -16,8 +16,8 @@ namespace Randomous.EntitySystem.Implementations
             services.AddTransient<IEntityProvider, EntityProvider>();
             services.AddSingleton<EntityQueryableEfCoreConfig>(); //Just get some defaults in there...
             //services.AddTransient<EntityProviderConfig>();
-            services.AddDbContext<BaseEntityContext>(buildContext);
-            services.AddScoped<DbContext, BaseEntityContext>(s =>
+            services.AddDbContext<BaseEntityContext>(buildContext, ServiceLifetime.Transient, ServiceLifetime.Transient);
+            services.AddTransient<DbContext, BaseEntityContext>(s =>
             {
                 var d = (BaseEntityContext)s.GetService(typeof(BaseEntityContext));
 
