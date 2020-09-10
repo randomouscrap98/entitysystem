@@ -17,9 +17,14 @@ SHOW FULL COLUMNS FROM Entities;
 
 To alter database to force utf8mb4:
 
-alter database contentapi character set utf8mb4 collate = utf8mb4_unicode_ci;
+alter database contentapi character set = utf8mb4 collate = utf8mb4_unicode_ci;
 
 
 To alter an existing table:
 
 alter table EntityValues convert to character set utf8mb4 collate utf8mb4_unicode_ci;
+
+
+
+
+NOTE: just run mysqlModify.sql to do what you need. Copy my.cnf to /etc/my.cnf, follow instructions in there.
