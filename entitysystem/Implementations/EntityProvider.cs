@@ -15,7 +15,7 @@ namespace Randomous.EntitySystem.Implementations
         protected IEntityQueryable query;
         protected IEntitySearcher searcher;
 
-        protected SemaphoreSlim accessLimiter = new SemaphoreSlim(1, 1);
+        //protected SemaphoreSlim accessLimiter = new SemaphoreSlim(1, 1);
 
 
         public EntityProvider(ILogger<EntityProvider> logger, IEntityQueryable query,
@@ -48,17 +48,19 @@ namespace Randomous.EntitySystem.Implementations
             return searcher.ApplyGeneric<T>(query, search, finalize);
         }
 
-        protected async Task<T> LockAsync<T>(Func<Task<T>> func)
+        protected Task<T> LockAsync<T>(Func<Task<T>> func)
         {
-            await accessLimiter.WaitAsync();
-            try { return await func(); }
-            finally { accessLimiter.Release(); }
+            //await accessLimiter.WaitAsync();
+            return func();
+            //try { return await func(); }
+            //finally { accessLimiter.Release(); }
         }
-        protected async Task LockAsync(Func<Task> func)
+        protected Task LockAsync(Func<Task> func)
         {
-            await accessLimiter.WaitAsync();
-            try { await func(); }
-            finally { accessLimiter.Release(); }
+            //await accessLimiter.WaitAsync();
+            return func();
+            //try { await func(); }
+            //finally { accessLimiter.Release(); }
         }
 
         public Task<List<E>> GetAllAsync<E>() where E : EntityBase { 

@@ -34,7 +34,9 @@ namespace Randomous.EntitySystem.Implementations
 
         public IQueryable<E> GetQueryable<E>() where E : EntityBase 
         { 
-            return context.Set<E>().AsNoTracking(); 
+            accessLimiter.Wait();
+            try { return context.Set<E>().AsNoTracking(); }
+            finally { accessLimiter.Release(); }
         }
 
         public async Task<List<E>> GetListAsync<E>(IQueryable<E> query) 
