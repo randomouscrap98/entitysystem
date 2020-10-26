@@ -102,7 +102,7 @@ namespace Randomous.EntitySystem.test
 
             queryable.WriteAsync(writeEntries.ToArray()).Wait();
 
-            Assert.True(queryable.GetMaxAsync(queryable.GetQueryable<Entity>(), x => x.id).Result >= 10);
+            Assert.True(queryable.GetMaxAsync(queryable.GetQueryableAsync<Entity>().Result, x => x.id).Result >= 10);
         }
     }
 

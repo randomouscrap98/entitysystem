@@ -70,7 +70,7 @@ namespace Randomous.EntitySystem.Implementations
         public Task<T> GetMaxAsync<T,E>(IQueryable<E> query, Expression<Func<E,T>> selector) { 
             return LockAsync(() => this.query.GetMaxAsync<T,E>(query, selector)); }
 
-        public IQueryable<E> GetQueryable<E>() where E : EntityBase { return query.GetQueryable<E>(); }
+        public Task<IQueryable<E>> GetQueryableAsync<E>() where E : EntityBase { return query.GetQueryableAsync<E>(); }
 
         public async Task WriteAsync<E>(params E[] entities) where E : EntityBase
         {
@@ -87,19 +87,31 @@ namespace Randomous.EntitySystem.Implementations
         public Task<List<Entity>> GetEntitiesAsync(EntitySearch search)
         {
             logger.LogTrace("GetEntitiesAsync called");
-            return LockAsync(() => query.GetListAsync(searcher.ApplyEntitySearch(query.GetQueryable<Entity>(), search)));
+            return LockAsync(async () => 
+            {
+                var entities = await query.GetQueryableAsync<Entity>();
+                return await query.GetListAsync(searcher.ApplyEntitySearch(entities, search));
+            });
         }
 
         public Task<List<EntityRelation>> GetEntityRelationsAsync(EntityRelationSearch search)
         {
             logger.LogTrace("GetEntityRelationsAsync called");
-            return LockAsync(() => query.GetListAsync(searcher.ApplyEntityRelationSearch(query.GetQueryable<EntityRelation>(), search)));
+            return LockAsync(async () => 
+            {
+                var relations = await query.GetQueryableAsync<EntityRelation>(); 
+                return await query.GetListAsync(searcher.ApplyEntityRelationSearch(relations, search));
+            });
         }
 
         public Task<List<EntityValue>> GetEntityValuesAsync(EntityValueSearch search)
         {
             logger.LogTrace("GetEntityValuesAsync called");
-            return LockAsync(() => query.GetListAsync(searcher.ApplyEntityValueSearch(query.GetQueryable<EntityValue>(), search)));
+            return LockAsync(async () => 
+            {
+                var values = await query.GetQueryableAsync<EntityValue>();
+                return await query.GetListAsync(searcher.ApplyEntityValueSearch(values, search));
+            });
         }
 
         public async Task<List<E>> ListenAsync<E>(object listenId, Func<IQueryable<E>, IQueryable<E>> filter, TimeSpan maxWait, CancellationToken token) where E : EntityBase
@@ -112,7 +124,8 @@ namespace Randomous.EntitySystem.Implementations
                 var listener = signaler.ListenAsync(listenId, q => filter(q.Where(e => e is E).Cast<E>()), maxWait, linkedCts.Token);
 
                 DateTime start = DateTime.Now; //Putting this down here to minimize startup time before listen (not that this little variable really matters)
-                var results = await LockAsync(() => query.GetListAsync(filter(query.GetQueryable<E>().Select(x => (E)x))));
+                var baseE = await query.GetQueryableAsync<E>();
+                var results = await LockAsync(() => query.GetListAsync(filter(baseE.Select(x => (E)x))));
 
                 if (results.Count > 0)
                 {

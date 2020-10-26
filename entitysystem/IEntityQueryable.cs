@@ -42,7 +42,7 @@ namespace Randomous.EntitySystem
         /// </summary>
         /// <typeparam name="E"></typeparam>
         /// <returns></returns>
-        IQueryable<E> GetQueryable<E>() where E : EntityBase;
+        Task<IQueryable<E>> GetQueryableAsync<E>() where E : EntityBase;
 
         Task WriteAsync<E>(params E[] entities) where E : EntityBase;
 

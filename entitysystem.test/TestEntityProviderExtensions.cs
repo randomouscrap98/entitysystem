@@ -96,7 +96,7 @@ namespace Randomous.EntitySystem.test
             provider.WriteAsync(package).Wait();
             Assert.True(package.Entity.id > 0);
 
-            var qresult = provider.GetQueryable<Entity>();
+            var qresult = provider.GetQueryableAsync<Entity>().Result;
             var result = provider.GetListAsync(qresult).Result;
             Assert.Single(result);
             Assert.Equal(package.Entity, result.First());
@@ -113,13 +113,13 @@ namespace Randomous.EntitySystem.test
             var package = NewPackage();
             provider.WriteAsync(package).Wait();
 
-            var qresult = provider.GetQueryable<Entity>();
+            var qresult = provider.GetQueryableAsync<Entity>().Result;
             var result = provider.GetListAsync(qresult).Result;
             var expanded = provider.LinkAsync(qresult).Result.First();
             expanded.Values.First().value = "lolButts";
             provider.WriteAsync(expanded).Wait();
 
-            qresult = provider.GetQueryable<Entity>();
+            qresult = provider.GetQueryableAsync<Entity>().Result;
             result = provider.GetListAsync(qresult).Result;
             var expanded2 = provider.LinkAsync(qresult).Result;
             Assert.Single(expanded2);
@@ -136,7 +136,7 @@ namespace Randomous.EntitySystem.test
             provider.WriteAsync(package).Wait();
             Assert.True(package.Entity.id > 0);
 
-            var qresult = provider.GetQueryable<Entity>();
+            var qresult = provider.GetQueryableAsync<Entity>().Result;
             var result = provider.GetListAsync(qresult).Result;
             Assert.Single(result);
             Assert.Equal(package.Entity, result.First());

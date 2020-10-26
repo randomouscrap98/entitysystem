@@ -85,9 +85,10 @@ namespace Randomous.EntitySystem.Extensions
         /// <param name="provider"></param>
         /// <param name="search"></param>
         /// <returns></returns>
-        public static Task<List<EntityPackage>> GetEntityPackagesAsync(this IEntityProvider provider, EntitySearch search)
+        public static async Task<List<EntityPackage>> GetEntityPackagesAsync(this IEntityProvider provider, EntitySearch search)
         {
-            return LinkAsync(provider, provider.ApplyEntitySearch(provider.GetQueryable<Entity>(), search));
+            var entities = await provider.GetQueryableAsync<Entity>();
+            return await LinkAsync(provider, provider.ApplyEntitySearch(entities, search));
         }
     }
 }

@@ -12,6 +12,7 @@ namespace Randomous.EntitySystem.Implementations
     public class EntityQueryableEfCoreConfig
     {
         public int ConcurrentAccess {get;set;} = 10;
+        public TimeSpan MaxLockWait {get;set;} = TimeSpan.FromSeconds(3);
     }
 
     public class EntityQueryableEfCore : IEntityQueryable
@@ -32,34 +33,52 @@ namespace Randomous.EntitySystem.Implementations
             this.accessLimiter = new SemaphoreSlim(config.ConcurrentAccess, config.ConcurrentAccess);
         }
 
-        public IQueryable<E> GetQueryable<E>() where E : EntityBase 
-        { 
-            accessLimiter.Wait();
-            try { return context.Set<E>().AsNoTracking(); }
-            finally { accessLimiter.Release(); }
-        }
-
-        public async Task<List<E>> GetListAsync<E>(IQueryable<E> query) 
-        { 
-            await accessLimiter.WaitAsync();
-            try { return await query.ToListAsync();  }
-            finally { accessLimiter.Release(); }
-        }
-
-        public async Task<T> GetMaxAsync<T,E>(IQueryable<E> query, Expression<Func<E, T>> selector)
+        public async Task<T> LockAsync<T>(Func<Task<T>> func)
         {
-            await accessLimiter.WaitAsync();
-            try { return await query.MaxAsync(selector);  }
+            if(!await accessLimiter.WaitAsync(config.MaxLockWait))
+                throw new TimeoutException($"Couldn't grab Query lock in time! {config.MaxLockWait}");
+            try { return await func(); }
             finally { accessLimiter.Release(); }
         }
 
-        public Task<List<E>> GetAllAsync<E>() where E : EntityBase { return GetListAsync(GetQueryable<E>()); }
-
-        protected async Task SaveChangesAsync()
+        public Task LockAsync(Func<Task> func)
         {
-            await accessLimiter.WaitAsync();
-            try { await context.SaveChangesAsync(); }
-            finally { accessLimiter.Release(); }
+            return LockAsync<bool>(async () => 
+            {
+                await func();
+                return true;
+            });
+        }
+
+        public T Lock<T>(Func<T> func)
+        {
+            return LockAsync(() => Task.FromResult(func())).Result;
+        }
+
+        public Task<IQueryable<E>> GetQueryableAsync<E>() where E : EntityBase 
+        { 
+            return LockAsync(() => Task.FromResult(context.Set<E>().AsNoTracking()));
+        }
+
+        public Task<List<E>> GetListAsync<E>(IQueryable<E> query) 
+        { 
+            return LockAsync(() => query.ToListAsync());
+        }
+
+        public Task<T> GetMaxAsync<T,E>(IQueryable<E> query, Expression<Func<E, T>> selector)
+        {
+            return LockAsync(() => query.MaxAsync(selector));
+        }
+
+        public async Task<List<E>> GetAllAsync<E>() where E : EntityBase 
+        { 
+            var queryable = await GetQueryableAsync<E>();
+            return await GetListAsync(queryable);
+        }
+
+        protected Task SaveChangesAsync()
+        {
+            return LockAsync(() => context.SaveChangesAsync());
         }
 
         public Task DeleteAsync<E>(params E[] items) where E : EntityBase

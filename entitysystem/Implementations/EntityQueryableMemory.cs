@@ -18,10 +18,10 @@ namespace Randomous.EntitySystem.Implementations
             this.logger = logger;
         }
 
-        public IQueryable<E> GetQueryable<E>() where E : EntityBase => AllItems.Where(x => x is E).Select(x => (E)x).AsQueryable();
+        public Task<IQueryable<E>> GetQueryableAsync<E>() where E : EntityBase => Task.FromResult(AllItems.Where(x => x is E).Select(x => (E)x).AsQueryable());
         public Task<List<E>> GetListAsync<E>(IQueryable<E> query) => Task.FromResult(query.ToList());
         public Task<T> GetMaxAsync<T,E>(IQueryable<E> query, Expression<Func<E, T>> selector) => Task.FromResult(query.Max(selector));
-        public async Task<List<E>> GetAllAsync<E>() where E : EntityBase { return await GetListAsync(GetQueryable<E>()); }
+        public async Task<List<E>> GetAllAsync<E>() where E : EntityBase { return await GetListAsync(await GetQueryableAsync<E>()); }
 
         public Task DeleteAsync<E>(params E[] items) where E : EntityBase
         {
