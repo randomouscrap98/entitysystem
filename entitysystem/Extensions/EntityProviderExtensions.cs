@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Randomous.EntitySystem;
 
 namespace Randomous.EntitySystem.Extensions
 {
@@ -58,8 +56,6 @@ namespace Randomous.EntitySystem.Extensions
         /// <returns></returns>
         public static async Task<List<EntityPackage>> LinkAsync(this IEntityProvider provider, IQueryable<Entity> queryable)
         {
-            //Logger?.LogTrace("LinkAsync called on entity queryable");
-
             //Performance test this sometime
             var entities = await provider.GetListAsync(queryable);
 
