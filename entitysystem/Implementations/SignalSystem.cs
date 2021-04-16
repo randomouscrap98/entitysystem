@@ -12,8 +12,6 @@ namespace Randomous.EntitySystem.Implementations
         public object ListenerId;
         public DateTime CreateDate = DateTime.Now;
         public List<T> Signalers = new List<T>();
-        //public bool Cancelled = false;
-        //public Func<T, bool> Filter;
         public Func<IQueryable<T>, IQueryable<T>> Filter;
         public ManualResetEvent Signal = new ManualResetEvent(false);
 
@@ -80,7 +78,6 @@ namespace Randomous.EntitySystem.Implementations
                         //Signal this listener if any did. Increase signal count for each item 
                         if(signalItems.Count > 0)
                         {
-                            //listener.Cancelled = cancel;
                             listener.Signalers = signalItems;
                             listener.Signal.Set();
                             listener.Signalers.ForEach(x => result[x]++);
